@@ -21,4 +21,18 @@ class DB
         Connection::fireConnection($connection);
         return Manager::table($table, $connection);
     }
+
+    /**
+     * @param $connection
+     * @param  $callback
+     * @param int $attempts
+     * @return mixed
+     * @throws \Throwable
+     * 事务管理
+     */
+    public static function transaction($connection, $callback, $attempts = 1)
+    {
+        Connection::fireConnection($connection);
+        return Manager::connection($connection)->transaction($callback, $attempts);
+    }
 }
