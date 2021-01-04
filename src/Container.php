@@ -14,7 +14,6 @@ use framework\log\Logger;
 use framework\response\Response;
 use framework\route\PipeLine;
 use framework\route\Router;
-use framework\view\frameworkView;
 use framework\view\HerosphpView;
 use framework\view\ViewInterface;
 use Psr\Container\ContainerInterface;

@@ -86,3 +86,47 @@ if (! function_exists('__print')) {
         echo '</pre></div>';
     }
 }
+
+/**
+ * 打印一行
+ * @param $msg
+ */
+if (! function_exists('printLine')) {
+    function printLine($msg)
+    {
+        echo("{$msg} \n");
+    }
+}
+
+/**
+ * 终端高亮打印绿色
+ * @param $message
+ */
+if (! function_exists('printOk')) {
+    function printOk($message)
+    {
+        printf("\033[32m\033[1m{$message}\033[0m\n");
+    }
+}
+
+/**
+ * 终端高亮打印红色
+ * @param $message
+ */
+if (! function_exists('printError')) {
+    function printError($message)
+    {
+        printf("\033[31m\033[1m{$message}\033[0m\n");
+    }
+}
+
+/**
+ * 终端高亮打印黄色
+ * @param $message
+ */
+if (! function_exists('printWarning')) {
+    function printWarning($message)
+    {
+        printf("\033[33m\033[1m{$message}\033[0m\n");
+    }
+}
