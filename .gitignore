@@ -1,0 +1,13 @@
+# Created by .ignore support plugin (hsz.mobi)
+.buildpath
+.settings/
+.project
+*.patch
+.php_cs.cache
+.idea/
+.git/
+runtime/
+codeCoverage/
+vendor/
+.phpintel/
+.DS_Store
