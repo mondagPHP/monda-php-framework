@@ -20,8 +20,6 @@
     "spatie/async": "^1.5"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.5",
-    "friendsofphp/php-cs-fixer": "^2.14"
   },
   "autoload": {
     "psr-4": {
@@ -36,8 +34,5 @@
       "type": "composer",
       "url": "https://mirrors.aliyun.com/composer"
     }
-  },
-  "scripts": {
-    "cs-fix": "composer dump -o && php-cs-fixer fix $1"
   }
 }
