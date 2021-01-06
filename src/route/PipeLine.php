@@ -7,6 +7,10 @@ namespace framework\route;
 
 use Closure;
 
+/**
+ * Class PipeLine
+ * @package framework\route
+ */
 class PipeLine
 {
     //所有要执行的类

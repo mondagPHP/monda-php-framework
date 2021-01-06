@@ -19,8 +19,6 @@
     "illuminate/database": "v5.8.36",
     "spatie/async": "^1.5"
   },
-  "require-dev": {
-  },
   "autoload": {
     "psr-4": {
       "framework\\": "src/"
