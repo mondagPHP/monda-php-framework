@@ -12,3 +12,5 @@ vendor/
 .phpintel/
 .DS_Store
 composer.lock
+phpunitTestRet/
+.phpunit.result.cache
