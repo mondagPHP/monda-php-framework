@@ -16,8 +16,20 @@
         <testsuite name="Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
+        <testsuite name="cache">
+            <directory>./tests/cache</directory>
+        </testsuite>
     </testsuites>
     <php>
         <ini name="memory_limit" value="2048M" />
     </php>
+    <filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+        <directory suffix=".php">src</directory>
+    </whitelist>
+    </filter>
+    <logging>
+        <log type="testdox-html" target="phpunitTestRet/testdox-html-log.html"/>
+        <log type="coverage-html" target="phpunitTestRet" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
 </phpunit>

@@ -2,14 +2,13 @@
 namespace framework\tests\cache;
 
 use framework\cache\RedisCache;
+use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
-use Mockery as m;
-use Mockery\Exception\NoMatchingExpectationException;
 
 class CacheRedisCacheTest extends TestCase
 {
-    /**@var $redis m */
+    /*@var $redis m */
     private $redis;
     private $redisCache;
 
@@ -47,12 +46,10 @@ class CacheRedisCacheTest extends TestCase
     {
         $this->redis->shouldReceive('get')->withAnyArgs()->andReturnNull();
         $this->redis->shouldReceive('set')->with('name', 'rose', 'ex', 6)->andReturnTrue();
-        $callback  = function () {
+        $callback = function () {
             return 'rose';
         };
         $ret = $this->redisCache->remember('name', 6, $callback);
         $this->assertEquals('rose', $ret);
     }
-
-    
 }
