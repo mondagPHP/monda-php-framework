@@ -67,4 +67,10 @@ class Response
         $this->code = $code;
         return $this;
     }
+
+    public function addHeader($key, $value)
+    {
+        $this->headers[$key] = $value;
+        return $this;
+    }
 }

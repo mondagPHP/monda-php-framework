@@ -49,6 +49,17 @@ if (! function_exists('cache')) {
     }
 }
 
+
+if (! function_exists('log')) {
+    /**
+     * @return Psr\Log\AbstractLogger
+     */
+    function log()
+    {
+        return Container::getContainer()->get('log');
+    }
+}
+
 /**
  * 模板渲染
  */

@@ -2,6 +2,8 @@
 
 namespace framework;
 
+use framework\schedule\TaskList;
+
 /**
  * Class Artisan
  * @package framework
@@ -11,7 +13,7 @@ class Artisan
     private static $SHORT_OPS = 'hv';
 
     private static $LONG_OPTS = [
-        'run:' => '执行一个客户脚本，参数是任务名称',
+        'run:' => '执行一个客户脚本，参数是任务名称'
     ];
 
     /**
@@ -20,6 +22,7 @@ class Artisan
     public static function run(): void
     {
         $opts = getopt(self::$SHORT_OPS, array_keys(self::$LONG_OPTS));
+
         if (empty($opts) || isset($opts['help']) || isset($opts['h'])) {
             self::printHelpInfo();
         }
@@ -29,7 +32,7 @@ class Artisan
         if (isset($opts['run'])) { //运行任务
             try {
                 $className = ucfirst($opts['run']) . 'Task';
-                $clazz = new \ReflectionClass("app\\task\\{$className}");
+                $clazz = new \ReflectionClass("app\\client\\{$className}");
                 $method = $clazz->getMethod('run');
                 $method->invoke($clazz->newInstance());
             } catch (\ReflectionException $exception) {
