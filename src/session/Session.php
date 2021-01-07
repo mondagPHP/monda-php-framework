@@ -37,13 +37,36 @@ class Session
         }
     }
 
+
+    /**
+     * 重置session的所有的数据
+     * @return void
+     */
+    public static function destory(): void
+    {
+        session_destroy();
+    }
+
+
+    /**
+     * 删除session某个key
+     *
+     * @param string $key
+     * @return void
+     */
+    public static function delete(string $key): void
+    {
+        unset($_SESSION[$key]);
+    }
+
+
     /**
      * 获取session值
-     * @param $key
+     * @param string $key
      * @param $default
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, $default = null)
     {
         return isset($_SESSION[$key]) ? $_SESSION[$key] : (is_callable($default) ? call_user_func($default) : $default);
     }
@@ -53,7 +76,7 @@ class Session
      * @param $key
      * @param $value
      */
-    public static function set($key, $value)
+    public static function set(string $key, $value)
     {
         $_SESSION[$key] = $value;
     }
