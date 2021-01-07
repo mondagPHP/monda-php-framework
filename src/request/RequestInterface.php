@@ -3,7 +3,10 @@
  * This file is part of Monda-PHP.
  *
  */
+
 namespace framework\request;
+
+use framework\file\FileUpload;
 
 /**
  * Interface RequestInterface.
@@ -29,4 +32,7 @@ interface RequestInterface
     public function getParameter(string $name, $default = null);
 
     public function getClientIp(); //获取IP地址
+
+    //获取上传的文件
+    public function getUploadFile(string $formKey): FileUpload;
 }

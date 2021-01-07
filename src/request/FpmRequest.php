@@ -3,7 +3,12 @@
  * This file is part of Monda-PHP.
  *
  */
+
 namespace framework\request;
+
+use framework\exception\HeroException;
+use framework\exception\UploadException;
+use framework\file\FileUpload;
 
 /**
  * Class FpmRequest.
@@ -42,7 +47,7 @@ class FpmRequest implements RequestInterface
         $requestParams = array_merge($_GET, $_POST);
         if (isset($headers['HTTP_CONTENT_TYPE']) && $headers['HTTP_CONTENT_TYPE'] === 'application/json') {
             $json = json_decode(file_get_contents('php://input'), 1);
-            if (! is_null($json)) {
+            if (!is_null($json)) {
                 $requestParams += $json;
             }
         }
@@ -120,5 +125,22 @@ class FpmRequest implements RequestInterface
             $ip = $this->headers['REMOTE_ADDR'];
         }
         return $ip;
+    }
+
+    /**
+     * 获取文件上传
+     * @param string $formKey
+     * @return FileUpload
+     * @throws UploadException
+     */
+    public function getUploadFile(string $formKey): FileUpload
+    {
+        $localFile = $_FILES[$formKey]['name'];
+        $tempFile = $_FILES[$formKey]['tmp_name'];//原来是这样
+        // 函数判断指定的文件是否是通过 HTTP POST 上传的。
+        if (!is_uploaded_file($tempFile)) {
+            throw new UploadException("上传的方式错误!");
+        }
+        return new FileUpload($localFile, $tempFile);
     }
 }
