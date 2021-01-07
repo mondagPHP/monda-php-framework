@@ -53,8 +53,8 @@ class Router
         if (isset($middlewareConfig['global'])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig['global']);
         }
-        if (isset($middlewareConfig['admin'])) {
-            $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig['admin']);
+        if (isset($middlewareConfig[strtolower($this->module)])) {
+            $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig[strtolower($this->module)]);
         }
         $controllerInstance = new $controller();
         $middleware = array_merge($globalMiddleware, $controllerInstance->getMiddleware()); // 合并控制器中间件
