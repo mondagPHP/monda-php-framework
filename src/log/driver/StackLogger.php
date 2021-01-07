@@ -50,6 +50,6 @@ class StackLogger extends AbstractLogger
         if (!is_dir($this->config['path'])) {
             FileUtils::makeFileDirs($this->config['path']);
         }
-        error_log($message, 3, $this->config['path'] . 'framework.log');
+        error_log($message, 3, $this->config['path'] . config('app.app_name') . '.log');
     }
 }

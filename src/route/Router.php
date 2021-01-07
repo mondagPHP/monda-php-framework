@@ -100,7 +100,7 @@ class Router
      */
     private function parseURL(RequestInterface $request): void
     {
-        $defaultUrlArr = Container::getContainer()->get('config')->get('app.defaultUrl');
+        $defaultUrlArr = Container::getContainer()->get('config')->get('app.default_url');
         //优先处理短链接映射
         $requestUri = $request->getUri();
         $urlInfo = parse_url($requestUri);

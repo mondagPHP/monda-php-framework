@@ -7,159 +7,84 @@ namespace framework\cookie;
  */
 class Cookie
 {
-    /**
-     * Cookie 前缀
-     * @var string
+    /*
+     * @name 设置cookie
+     * @param $name string 名称
+     * @param $value mixed 值,字符串或数组
+     * @param $options array 选项
+     * @return 无
      */
-    protected $prefix = 'monda_';
-
-    /**
-     * Cookie 保存时间
-     * @var int
-     */
-    protected $expire = 0;
-
-    /**
-     * Cookie 保存路径
-     * @var string
-     */
-    protected $path = '/';
-
-    /**
-     * Cookie 有效域名
-     * @var string
-     */
-    protected $domain = '';
-
-    /**
-     * 是否启用安全传输
-     * @var bool
-     */
-    protected $secure = false;
-
-    /**
-     * httponly
-     * @var bool
-     */
-    protected $httponly = false;
-
-    /**
-     * 是否使用setcookie
-     * @var bool
-     */
-    protected $setcookie = true;
-
-    /**
-     * Cookie constructor.
-     * @param array $options
-     */
-    public function __construct(string $prefix = '', array $options = [])
+    public static function set($name, $value, $expire = 0, $path = "", $domain = "", $secure = false, $httponly = false): bool
     {
-        if (!empty($this->httponly)) {
-            ini_set('session.cookie_httponly', 1);
-        }
-        if (!empty($prefix)) {
-            $this->prefix = $prefix;
-        }
-        if ($options) {
-            foreach ($options as $key => $val) {
-                isset($this->$key) && $this->$key = $val;
-            }
-        }
-        return $this;
+        $value = self::_encrypt(json_encode($value), 'E', config('app.app_key'));
+        return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
 
 
     /**
-     * 判断Cookie是否存在
-     * @param   $name           Cookie 名称
-     * @return  bool
+     * 删除cookie
+     * @param $name
+     * @param string $path
+     * @param string $domain
+     * @param bool $secure
+     * @param bool $httponly
      */
-    public function has($name)
+    public static function delete($name, $path = "", $domain = "", $secure = false, $httponly = false): void
     {
-        $name = $this->prefix . $name;
-        return isset($_COOKIE[$name]);
-    }
-
-    /**
-     * 设置Cookie
-     * @param string $name Cookie 名称
-     * @param mixed $value Cookie 值
-     */
-    public function set(string $name, $value, int $exprie = 3600)
-    {
-        $name = $this->prefix . $name;
-        if (is_array($value)) {
-            $value = json_encode($value);
-        }
-        if ($this->setcookie) {
-            setcookie($name, $value, $expire, $this->path, $this->domain, $this->secure, $this->httponly);
-        }
-        $_COOKIE[$name] = $value;
-    }
-
-    /**
-     * 获取Cookie数据
-     * @param string $name Cookie 名称，为空获取所有
-     * @return array|mixed|null
-     */
-    public function get(string $name, $default = null)
-    {
-        $name = $this->prefix . $name;
-        if (isset($_COOKIE[$name])) {
-            $value = $_COOKIE[$name];
-            if (!is_null(json_decode($value))) {
-                $value = json_decode($value, true);
-            }
-        } else {
-            $value = $default;
-        }
-        return $value;
-    }
-
-    /**
-     * 删除Cookie
-     * @param $name         Cookie 名称
-     */
-    public function delete($name)
-    {
-        $name = $this->prefix . $name;
-        if ($this->setcookie) {
-            setcookie($name, '', $_SERVER['REQUEST_TIME'] - 3600, $this->path, $this->domain, $this->secure, $this->httponly);
-        }
+        setcookie($name, '', time() - 3600, $path, $domain, $secure, $httponly);
         unset($_COOKIE[$name]);
     }
 
-    /**
-     * 清空Cookie
-     */
-    public function clear()
-    {
-        if (empty($_COOKIE)) {
-            return;
-        }
-        $prefix = $this->prefix;
-        if ($prefix) {
-            foreach ($_COOKIE as $key => $val) {
-                if (0 === strpos($key, $prefix)) {
-                    if ($this->setcookie) {
-                        setcookie($key, '', $_SERVER['REQUEST_TIME'] - 3600, $this->path, $this->domain, $this->secure, $this->httponly);
-                    }
-                    unset($_COOKIE[$key]);
-                }
-            }
-        }
-        return;
-    }
 
     /**
-     * 永久保存Cookie
-     * @param $name             Cookie 名称
-     * @param string $value Cookie 值
+     * 取出cookie
+     * @param $name
+     * @param null $default
+     * @return mixed|null
      */
-    public function forever($name, $value)
+    public static function get($name, $default = null)
     {
-        $expire = 3600 * 24 * 365;
-        $this->set($name, $value, $exprie);
+        if (!isset($_COOKIE[$name])) {
+            return $default;
+        }
+        $value = $_COOKIE[$name];
+        $value = json_decode(self::_encrypt($value, 'D', config('app.app_key')), true);
+        return $value;
+    }
+
+    /* 加密核心, 私有方法, 不可调用 */
+    private static function _encrypt($string, $operation, $key)
+    {
+        $key = md5($key);
+        $key_length = strlen($key);
+        $string = $operation === 'D' ? base64_decode($string) : substr(md5($string . $key), 0, 8) . $string;
+        $string_length = strlen($string);
+        $randKey = $box = array();
+        $result = '';
+        for ($i = 0; $i <= 255; $i++) {
+            $randKey[$i] = ord($key[$i % $key_length]);
+            $box[$i] = $i;
+        }
+        for ($j = $i = 0; $i < 256; $i++) {
+            $j = ($j + $box[$i] + $randKey[$i]) % 256;
+            $tmp = $box[$i];
+            $box[$i] = $box[$j];
+            $box[$j] = $tmp;
+        }
+        for ($a = $j = $i = 0; $i < $string_length; $i++) {
+            $a = ($a + 1) % 256;
+            $j = ($j + $box[$a]) % 256;
+            $tmp = $box[$a];
+            $box[$a] = $box[$j];
+            $box[$j] = $tmp;
+            $result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
+        }
+        if ($operation === 'D') {
+            if (strpos($result, substr(md5(substr($result, 8) . $key), 0, 8)) === 0) {
+                return substr($result, 8);
+            }
+            return '';
+        }
+        return str_replace('=', '', base64_encode($result));
     }
 }
