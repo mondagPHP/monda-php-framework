@@ -19,13 +19,13 @@ class CacheRedisCacheTest extends TestCase
         $this->redisCache = new RedisCache($this->redis);
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $this->redis->shouldReceive('get')->with('name')->andReturn('tom');
         $this->assertEquals('tom', $this->redisCache->get('name'));
     }
 
-    public function testSetWithExpire()
+    public function testSetWithExpire(): void
     {
         $this->redis->shouldReceive('set')->with('name', 'tom', 'ex', 6)->andReturnTrue();
         $ret = $this->redisCache->set('name', 'tom', 6);
@@ -35,14 +35,14 @@ class CacheRedisCacheTest extends TestCase
         $this->assertTrue($ret2);
     }
 
-    public function testDel()
+    public function testDel(): void
     {
         $this->redis->shouldReceive('del')->with('name')->andReturnTrue();
         $ret = $this->redisCache->del('name');
         $this->assertTrue($ret);
     }
 
-    public function testRemember()
+    public function testRemember(): void
     {
         $this->redis->shouldReceive('get')->withAnyArgs()->andReturnNull();
         $this->redis->shouldReceive('set')->with('name', 'rose', 'ex', 6)->andReturnTrue();
