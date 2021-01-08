@@ -12,6 +12,7 @@
     "ext-json": "*",
     "ext-openssl": "*",
     "ext-mbstring": "*",
+    "ext-gd": "*",
     "psr/container": "^1.0",
     "predis/predis": "^1.1",
     "psr/log": "^1.1",

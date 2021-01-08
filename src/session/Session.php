@@ -21,7 +21,7 @@ class Session
      */
     public static function start(): void
     {
-        if (! isset($_SESSION)) {
+        if (!isset($_SESSION)) {
             switch (config('session.session_handler')) {
                 case 'file':
                     session_set_save_handler(new FileSession(config('session.file')), true);
@@ -37,15 +37,38 @@ class Session
         }
     }
 
+
+    /**
+     * 重置session的所有的数据
+     * @return void
+     */
+    public static function destroy(): void
+    {
+        session_destroy();
+    }
+
+
+    /**
+     * 删除session某个key
+     *
+     * @param string $key
+     * @return void
+     */
+    public static function delete(string $key): void
+    {
+        unset($_SESSION[$key]);
+    }
+
+
     /**
      * 获取session值
-     * @param $key
+     * @param string $key
      * @param $default
      * @return mixed
      */
-    public static function get($key, $default = null)
+    public static function get(string $key, $default = null)
     {
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : (is_callable($default) ? call_user_func($default) : $default);
+        return $_SESSION[$key] ?? (is_callable($default) ? $default() : $default);
     }
 
     /**
@@ -53,7 +76,7 @@ class Session
      * @param $key
      * @param $value
      */
-    public static function set($key, $value)
+    public static function set(string $key, $value): void
     {
         $_SESSION[$key] = $value;
     }
