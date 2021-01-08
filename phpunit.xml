@@ -11,6 +11,7 @@
          stopOnError="false"
          stopOnFailure="false"
          verbose="true"
+         cacheResultFile="phpunitTestRet"
 >
     <testsuites>
         <testsuite name="Test Suite">
@@ -23,7 +24,8 @@
     <php>
         <ini name="memory_limit" value="2048M" />
     </php>
-    <filter>
+    <!--开启代码覆盖率报告 需要开启xdebug扩展 xdebug.mode=coverage-->
+    <!-- <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
         <directory suffix=".php">src</directory>
     </whitelist>
@@ -31,5 +33,5 @@
     <logging>
         <log type="testdox-html" target="phpunitTestRet/testdox-html-log.html"/>
         <log type="coverage-html" target="phpunitTestRet" lowUpperBound="35" highLowerBound="70"/>
-    </logging>
+    </logging> -->
 </phpunit>
