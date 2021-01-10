@@ -15,13 +15,12 @@ class Loader
 {
     /**
      * @param $serviceClass
-     * @param bool $singleton
      * @return mixed
      */
-    public static function service($serviceClass, $singleton = true)
+    public static function service($serviceClass)
     {
         if (! Container::getContainer()->has($serviceClass)) {
-            Container::getContainer()->bind($serviceClass, $serviceClass, $singleton);
+            Container::getContainer()->bind($serviceClass, $serviceClass, true);
         }
         return Container::getContainer()->get($serviceClass);
     }

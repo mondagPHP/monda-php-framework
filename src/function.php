@@ -42,24 +42,6 @@ if (! function_exists('config')) {
     }
 }
 
-if (! function_exists('cache')) {
-    function cache()
-    {
-        return Container::getContainer()->get('cache');
-    }
-}
-
-
-if (! function_exists('log')) {
-    /**
-     * @return Psr\Log\AbstractLogger
-     */
-    function log()
-    {
-        return Container::getContainer()->get('log');
-    }
-}
-
 /**
  * 模板渲染
  */

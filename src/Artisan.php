@@ -2,8 +2,6 @@
 
 namespace framework;
 
-use framework\schedule\TaskList;
-
 /**
  * Class Artisan
  * @package framework

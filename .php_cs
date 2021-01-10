@@ -24,7 +24,6 @@ return PhpCsFixer\Config::create()
             ],
             'sort_algorithm' => 'alpha',
         ],
-
         'combine_consecutive_unsets' => true,
         'declare_strict_types' => false,
         'linebreak_after_opening_tag' => true,
@@ -51,10 +50,6 @@ return PhpCsFixer\Config::create()
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
-            ->exclude('runtime')
-            ->exclude('static')
-            ->exclude('herosphp')
-            ->exclude('runtime')
             ->exclude('vendor')
             ->in(__DIR__)
     )

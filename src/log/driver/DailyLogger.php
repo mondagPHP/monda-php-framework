@@ -41,7 +41,7 @@ class DailyLogger extends AbstractLogger
 
     /**
      * @param mixed $level 级别
-     * @param string $message 信息
+     * @param mixed $message 信息
      * @param array $context 上下文
      */
     public function log($level, $message, array $context = []): void

@@ -1,4 +1,5 @@
-<?php /** @noinspection ALL */
+<?php
+/** @noinspection ALL */
 declare(strict_types=1);
 
 namespace framework\string;
@@ -9,8 +10,6 @@ namespace framework\string;
  */
 class Str
 {
-    private $s;
-
     public const CHARS_ARRAY = [
         '0' => ['°', '₀', '۰', '０'],
         '1' => ['¹', '₁', '۱', '１'],
@@ -168,6 +167,7 @@ class Str
             "\xE2\x80\xAF", "\xE2\x81\x9F", "\xE3\x80\x80",
             "\xEF\xBE\xA0"],
     ];
+    private $s;
 
     /**
      * Make new instance of Str class
@@ -213,7 +213,7 @@ class Str
      * @param string $str
      * @return Str
      */
-    public static function make(string $str): Str
+    public static function make(string $str): self
     {
         return new self($str);
     }
@@ -236,7 +236,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function substr(int $start = 0, int $length = 0): Str
+    public function substr(int $start = 0, int $length = 0): self
     {
         $this->s = \mb_substr($this->s, $start, $length !== 0 ? $length : \mb_strlen($this->s));
         return $this;
@@ -302,7 +302,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function ensureLeft(string $check): Str
+    public function ensureLeft(string $check): self
     {
         if ('' !== $check && 0 === \mb_strpos($this->s, $check)) {
             return $this;
@@ -327,7 +327,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function ensureRight(string $check): Str
+    public function ensureRight(string $check): self
     {
         if ('' !== $check && \mb_substr($this->s, -\mb_strlen($check)) === $check) {
             return $this;
@@ -379,7 +379,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function replace(string $old, string $new): Str
+    public function replace(string $old, string $new): self
     {
         $this->s = (string)\mb_ereg_replace(\preg_quote($old, '/'), $new, $this->s);
         return $this;
@@ -405,7 +405,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function replaceWithLimit(string $old, string $new, int $limit = -1): Str
+    public function replaceWithLimit(string $old, string $new, int $limit = -1): self
     {
         if ($old === $new || $limit === 0) {
             return $this;
@@ -442,7 +442,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toLowerCase(): Str
+    public function toLowerCase(): self
     {
         $this->s = \mb_strtolower($this->s);
         return $this;
@@ -462,7 +462,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toUpperCase(): Str
+    public function toUpperCase(): self
     {
         $this->s = \mb_strtoupper($this->s);
         return $this;
@@ -485,7 +485,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function trim(string $chars = ''): Str
+    public function trim(string $chars = ''): self
     {
         $chars = '' === $chars ? '\s' : \preg_quote($chars, '/');
         $this->s = (string)\mb_ereg_replace("^[$chars]+|[$chars]+\$", '', $this->s);
@@ -509,13 +509,12 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function trimLeft(string $chars = ''): Str
+    public function trimLeft(string $chars = ''): self
     {
         $chars = '' === $chars ? '\s' : \preg_quote($chars, '/');
         $this->s = (string)\mb_ereg_replace("^[$chars]+", '', $this->s);
         return $this;
     }
-
 
     /**
      * trimRight
@@ -534,7 +533,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function trimRight(string $chars = ''): Str
+    public function trimRight(string $chars = ''): self
     {
         $chars = '' === $chars ? '\s' : \preg_quote($chars, '/');
         $this->s = (string)\mb_ereg_replace("[$chars]+\$", '', $this->s);
@@ -556,7 +555,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function append(string $sub): Str
+    public function append(string $sub): self
     {
         $this->s .= $sub;
         return $this;
@@ -577,7 +576,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function prepend(string $sub): Str
+    public function prepend(string $sub): self
     {
         $this->s = $sub . $this->s;
         return $this;
@@ -598,7 +597,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function at(int $pos): Str
+    public function at(int $pos): self
     {
         $this->s = \mb_substr($this->s, $pos, 1);
         return $this;
@@ -664,7 +663,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function first(int $length = 1): Str
+    public function first(int $length = 1): self
     {
         if ($length <= 0) {
             $this->s = '';
@@ -689,7 +688,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function last(int $length = 1): Str
+    public function last(int $length = 1): self
     {
         if ($length <= 0) {
             $this->s = '';
@@ -807,7 +806,7 @@ class Str
             return false;
         }
         foreach ($needles as $needle) {
-            if (!$this->contains($needle, $caseSensitive)) {
+            if (! $this->contains($needle, $caseSensitive)) {
                 return false;
             }
         }
@@ -971,30 +970,10 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function padBoth(int $length, string $padStr = ' '): Str
+    public function padBoth(int $length, string $padStr = ' '): self
     {
         $padding = $length - \mb_strlen($this->s);
         $this->applyPadding((int)floor($padding / 2), (int)ceil($padding / 2), $padStr);
-        return $this;
-    }
-
-    /**
-     * applyPadding
-     *
-     * @param int $left
-     * @param int $right
-     * @param string $padStr
-     * @return Str
-     * @since 1.0.0
-     */
-    private function applyPadding(int $left = 0, int $right = 0, string $padStr = ' '): Str
-    {
-        if ('' === $padStr || $right + $left <= 0) {
-            return $this;
-        }
-        $leftPadding = \mb_substr(str_repeat($padStr, $left), 0, $left);
-        $rightPadding = \mb_substr(str_repeat($padStr, $right), 0, $right);
-        $this->s = $leftPadding . $this->s . $rightPadding;
         return $this;
     }
 
@@ -1014,7 +993,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function padLeft(int $length, string $padStr = ' '): Str
+    public function padLeft(int $length, string $padStr = ' '): self
     {
         $this->applyPadding($length - \mb_strlen($this->s), 0, $padStr);
         return $this;
@@ -1036,7 +1015,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function padRight(int $length, string $padStr = ' '): Str
+    public function padRight(int $length, string $padStr = ' '): self
     {
         $this->applyPadding(0, $length - \mb_strlen($this->s), $padStr);
         return $this;
@@ -1058,7 +1037,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function insert(string $substring, int $index): Str
+    public function insert(string $substring, int $index): self
     {
         $this->s = \mb_substr($this->s, 0, $index) . $substring . \mb_substr($this->s, $index);
         return $this;
@@ -1079,7 +1058,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function removeLeft(string $substring): Str
+    public function removeLeft(string $substring): self
     {
         if ('' !== $substring && 0 === \mb_strpos($this->s, $substring)) {
             $this->s = \mb_substr($this->s, \mb_strlen($substring));
@@ -1102,7 +1081,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function removeRight(string $substring): Str
+    public function removeRight(string $substring): self
     {
         if ('' !== $substring && \mb_substr($this->s, -\mb_strlen($substring)) === $substring) {
             $this->s = \mb_substr($this->s, 0, \mb_strlen($this->s) - \mb_strlen($substring));
@@ -1125,7 +1104,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function repeat(int $multiplier): Str
+    public function repeat(int $multiplier): self
     {
         $this->s = \str_repeat($this->s, $multiplier);
         return $this;
@@ -1145,7 +1124,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function reverse(): Str
+    public function reverse(): self
     {
         $reversed = '';
         $i = \mb_strlen($this->s);
@@ -1170,7 +1149,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function shuffle(): Str
+    public function shuffle(): self
     {
         $indexes = \range(0, \mb_strlen($this->s) - 1);
         \shuffle($indexes);
@@ -1200,7 +1179,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function between(string $start, string $end, int $offset = 0): Str
+    public function between(string $start, string $end, int $offset = 0): self
     {
         $posStart = \mb_strpos($this->s, $start, $offset);
         if ($posStart === false) {
@@ -1233,7 +1212,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function camelize(): Str
+    public function camelize(): self
     {
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
         $this->s = \mb_strtolower(\mb_substr($this->s, 0, 1)) . \mb_substr($this->s, 1);
@@ -1264,7 +1243,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function lowerCaseFirst(): Str
+    public function lowerCaseFirst(): self
     {
         $this->s = \mb_strtolower(\mb_substr($this->s, 0, 1)) . \mb_substr($this->s, 1);
         return $this;
@@ -1284,7 +1263,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function upperCaseFirst(): Str
+    public function upperCaseFirst(): self
     {
         $this->s = \mb_strtoupper(\mb_substr($this->s, 0, 1)) . \mb_substr($this->s, 1);
         return $this;
@@ -1306,7 +1285,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function collapseWhitespace(): Str
+    public function collapseWhitespace(): self
     {
         $this->s = (string)\mb_ereg_replace('[[:space:]]+', ' ', $this->s);
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
@@ -1333,7 +1312,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function regexReplace(string $pattern, string $replacement, string $options = 'msr'): Str
+    public function regexReplace(string $pattern, string $replacement, string $options = 'msr'): self
     {
         $this->s = (string)\mb_ereg_replace($pattern, $replacement, $this->s, $options);
         return $this;
@@ -1355,7 +1334,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function dasherize(): Str
+    public function dasherize(): self
     {
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
         $this->s = \mb_strtolower((string)\mb_ereg_replace('\B([A-Z])', '-\1', $this->s));
@@ -1381,7 +1360,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function delimit($delimiter): Str
+    public function delimit($delimiter): self
     {
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
         $this->s = \mb_strtolower((string)\mb_ereg_replace('\B([A-Z])', '-\1', $this->s));
@@ -1487,7 +1466,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function htmlDecode(int $flags = ENT_COMPAT): Str
+    public function htmlDecode(int $flags = ENT_COMPAT): self
     {
         $this->s = \html_entity_decode($this->s, $flags);
         return $this;
@@ -1510,7 +1489,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function htmlEncode(int $flags = ENT_COMPAT): Str
+    public function htmlEncode(int $flags = ENT_COMPAT): self
     {
         $this->s = \htmlentities($this->s, $flags);
         return $this;
@@ -1530,7 +1509,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function humanize(): Str
+    public function humanize(): self
     {
         $this->s = \str_replace('_', ' ', $this->s);
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
@@ -1779,7 +1758,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function longestCommonPrefix(string $otherStr): Str
+    public function longestCommonPrefix(string $otherStr): self
     {
         $maxLength = min(\mb_strlen($this->s), \mb_strlen($otherStr));
         $longestCommonPrefix = '';
@@ -1810,7 +1789,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function longestCommonSuffix(string $otherStr): Str
+    public function longestCommonSuffix(string $otherStr): self
     {
         $maxLength = min(\mb_strlen($this->s), \mb_strlen($otherStr));
         $longestCommonSuffix = '';
@@ -1842,7 +1821,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function longestCommonSubstring(string $otherStr): Str
+    public function longestCommonSubstring(string $otherStr): self
     {
         $strLength = \mb_strlen($this->s);
         $otherLength = \mb_strlen($otherStr);
@@ -1886,7 +1865,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function safeTruncate(int $length, string $substring = ''): Str
+    public function safeTruncate(int $length, string $substring = ''): self
     {
         if ($length >= \mb_strlen($this->s)) {
             return $this;
@@ -1923,12 +1902,12 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function slugify(string $replacement = '-', string $language = 'en'): Str
+    public function slugify(string $replacement = '-', string $language = 'en'): self
     {
         $split = \preg_split('/[-_]/', $language);
         $language = \strtolower($split[0]);
         $languageSpecific = ['de' => [['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü'], ['ae', 'oe', 'ue', 'AE', 'OE', 'UE']], 'bg' => [['х', 'Х', 'щ', 'Щ', 'ъ', 'Ъ', 'ь', 'Ь'], ['h', 'H', 'sht', 'SHT', 'a', 'А', 'y', 'Y']]];
-        if (!empty($languageSpecific[$language])) {
+        if (! empty($languageSpecific[$language])) {
             $this->s = \str_replace($languageSpecific[$language][0], $languageSpecific[$language][1], $this->s);
         }
         foreach (self::CHARS_ARRAY as $key => $value) {
@@ -1972,12 +1951,12 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toAscii(string $language = 'en', bool $removeUnsupported = true): Str
+    public function toAscii(string $language = 'en', bool $removeUnsupported = true): self
     {
         $split = \preg_split('/[-_]/', $language);
         $language = \strtolower($split[0]);
         $languageSpecific = ['de' => [['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü'], ['ae', 'oe', 'ue', 'AE', 'OE', 'UE']], 'bg' => [['х', 'Х', 'щ', 'Щ', 'ъ', 'Ъ', 'ь', 'Ь'], ['h', 'H', 'sht', 'SHT', 'a', 'А', 'y', 'Y']]];
-        if (!empty($languageSpecific[$language])) {
+        if (! empty($languageSpecific[$language])) {
             $this->s = \str_replace($languageSpecific[$language][0], $languageSpecific[$language][1], $this->s);
         }
         foreach (self::CHARS_ARRAY as $key => $value) {
@@ -2007,7 +1986,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function slice(int $start, int $end = null): Str
+    public function slice(int $start, int $end = null): self
     {
         if ($end === null) {
             $length = \mb_strlen($this->s);
@@ -2038,7 +2017,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function stripWhitespace(): Str
+    public function stripWhitespace(): self
     {
         $this->s = (string)\mb_ereg_replace('[[:space:]]+', '', $this->s);
         return $this;
@@ -2062,7 +2041,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function truncate(int $length, string $substring = ''): Str
+    public function truncate(int $length, string $substring = ''): self
     {
         if ($length >= \mb_strlen($this->s)) {
             return $this;
@@ -2087,7 +2066,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function upperCamelize(): Str
+    public function upperCamelize(): self
     {
         $this->s = (string)\mb_ereg_replace("^[\s]+|[\s]+\$", '', $this->s);
         $this->s = (string)\preg_replace('/^[-_]+/', '', $this->s);
@@ -2116,7 +2095,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function surround(string $substring): Str
+    public function surround(string $substring): self
     {
         $this->s = $substring . $this->s . $substring;
         return $this;
@@ -2136,7 +2115,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function swapCase(): Str
+    public function swapCase(): self
     {
         $this->s = \mb_strtolower($this->s) ^ \mb_strtoupper($this->s) ^ $this->s;
         return $this;
@@ -2157,7 +2136,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function tidy(): Str
+    public function tidy(): self
     {
         $this->s = (string)\preg_replace(['/\x{2026}/u', '/[\x{201C}\x{201D}]/u', '/[\x{2018}\x{2019}]/u', '/[\x{2013}\x{2014}]/u'], ['...', '"', "'", '-'], $this->s);
         return $this;
@@ -2179,7 +2158,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function titleize(array $ignore = []): Str
+    public function titleize(array $ignore = []): self
     {
         $this->s = \trim($this->s);
         $this->s = (string)\preg_replace_callback('/([\S]+)/u', function ($match) use ($ignore) {
@@ -2239,7 +2218,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toSpaces(int $tabLength = 4): Str
+    public function toSpaces(int $tabLength = 4): self
     {
         $this->s = \str_replace("\t", \str_repeat(' ', $tabLength), $this->s);
         return $this;
@@ -2261,7 +2240,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toTabs(int $tabLength = 4): Str
+    public function toTabs(int $tabLength = 4): self
     {
         $this->s = \str_replace(\str_repeat(' ', $tabLength), "\t", $this->s);
         return $this;
@@ -2281,7 +2260,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function toTitleCase(): Str
+    public function toTitleCase(): self
     {
         $this->s = \mb_convert_case($this->s, \MB_CASE_TITLE);
         return $this;
@@ -2303,7 +2282,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function underscored(): Str
+    public function underscored(): self
     {
         $this->s = (string)\mb_ereg_replace("^['\s']+|['\s']+\$", '', $this->s);
         $this->s = \mb_strtolower((string)\mb_ereg_replace('\B([A-Z])', '-\1', $this->s));
@@ -2329,7 +2308,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function move(int $start, int $length, int $destination): Str
+    public function move(int $start, int $length, int $destination): self
     {
         if ($destination <= $length) {
             return $this;
@@ -2358,7 +2337,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function overwrite(int $start, int $length, string $substr): Str
+    public function overwrite(int $start, int $length, string $substr): self
     {
         if ($length <= 0) {
             return $this;
@@ -2383,7 +2362,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function snakeize(): Str
+    public function snakeize(): self
     {
         $this->s = (string)\mb_ereg_replace('::', '/', $this->s);
         $this->s = (string)\mb_ereg_replace('([A-Z]+)([A-Z][a-z])', '\1_\2', $this->s);
@@ -2421,7 +2400,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function afterFirst(string $needle, string $substr, int $times = 1): Str
+    public function afterFirst(string $needle, string $substr, int $times = 1): self
     {
         $idxEnd = \mb_strpos($this->s, $needle) + \mb_strlen($needle);
         $this->s = \mb_substr($this->s, 0, $idxEnd) . \str_repeat($substr, $times) . \mb_substr($this->s, $idxEnd);
@@ -2446,7 +2425,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function beforeFirst(string $needle, string $substr, int $times = 1): Str
+    public function beforeFirst(string $needle, string $substr, int $times = 1): self
     {
         $idx = \mb_strpos($this->s, $needle);
         $this->s = \mb_substr($this->s, 0, $idx) . \str_repeat($substr, $times) . \mb_substr($this->s, $idx);
@@ -2471,7 +2450,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function afterLast(string $needle, string $substr, int $times = 1): Str
+    public function afterLast(string $needle, string $substr, int $times = 1): self
     {
         $idxEnd = \mb_strrpos($this->s, $needle) + \mb_strlen($needle);
         $this->s = \mb_substr($this->s, 0, $idxEnd) . \str_repeat($substr, $times) . \mb_substr($this->s, $idxEnd);
@@ -2496,7 +2475,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function beforeLast(string $needle, string $substr, int $times = 1): Str
+    public function beforeLast(string $needle, string $substr, int $times = 1): self
     {
         $idx = \mb_strrpos($this->s, $needle);
         $this->s = \mb_substr($this->s, 0, $idx) . \str_repeat($substr, $times) . \mb_substr($this->s, $idx);
@@ -2583,7 +2562,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function random(int $size, int $sizeMax = -1, string $possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): Str
+    public function random(int $size, int $sizeMax = -1, string $possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): self
     {
         if ($size <= 0 || $sizeMax === 0) {
             $this->s = '';
@@ -2623,7 +2602,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function appendUniqueIdentifier(int $size = 4, int $sizeMax = -1, string $possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): Str
+    public function appendUniqueIdentifier(int $size = 4, int $sizeMax = -1, string $possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): self
     {
         if ($size <= 0 || $sizeMax === 0) {
             $this->s = '';
@@ -2682,7 +2661,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function quote(string $quote = '"'): Str
+    public function quote(string $quote = '"'): self
     {
         $words = \mb_split('[[:space:]]+', $this->s);
         $result = [];
@@ -2708,7 +2687,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function unquote(string $quote = '"'): Str
+    public function unquote(string $quote = '"'): self
     {
         $words = \mb_split('[[:space:]]+', $this->s);
         $result = [];
@@ -2770,7 +2749,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function join(string $separator, array $otherStrings = []): Str
+    public function join(string $separator, array $otherStrings = []): self
     {
         if ('' === $this->s) {
             return $this;
@@ -2797,7 +2776,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function shift(string $delimiter): Str
+    public function shift(string $delimiter): self
     {
         if ('' === $delimiter) {
             $this->s = '';
@@ -2822,7 +2801,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function shiftReversed(string $delimiter): Str
+    public function shiftReversed(string $delimiter): self
     {
         if ('' === $delimiter) {
             $this->s = '';
@@ -2848,7 +2827,7 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function pop(string $delimiter): Str
+    public function pop(string $delimiter): self
     {
         if ('' === $delimiter) {
             $this->s = '';
@@ -2875,13 +2854,33 @@ class Str
      * @return Str
      * @since 1.0.0
      */
-    public function popReversed(string $delimiter): Str
+    public function popReversed(string $delimiter): self
     {
         if ('' === $delimiter) {
             $this->s = '';
             return $this;
         }
         $this->s = \mb_substr($this->s, 0, \mb_strrpos($this->s, $delimiter) ?: \mb_strlen($this->s));
+        return $this;
+    }
+
+    /**
+     * applyPadding
+     *
+     * @param int $left
+     * @param int $right
+     * @param string $padStr
+     * @return Str
+     * @since 1.0.0
+     */
+    private function applyPadding(int $left = 0, int $right = 0, string $padStr = ' '): self
+    {
+        if ('' === $padStr || $right + $left <= 0) {
+            return $this;
+        }
+        $leftPadding = \mb_substr(str_repeat($padStr, $left), 0, $left);
+        $rightPadding = \mb_substr(str_repeat($padStr, $right), 0, $right);
+        $this->s = $leftPadding . $this->s . $rightPadding;
         return $this;
     }
 }

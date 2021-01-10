@@ -6,6 +6,7 @@ use framework\exception\HeroException;
 use framework\exception\ValidateException;
 use framework\request\RequestInterface;
 use framework\util\ModelTransformUtils;
+use framework\vo\RequestVoInterface;
 use ReflectionException;
 
 /**
@@ -24,16 +25,16 @@ class RequestValidator
     public function valid(RequestInterface $request, string $classVo): object
     {
         $data = $request->getRequestParams();
-
         /** @var RequestVoInterface $vo */
         $vo = ModelTransformUtils::map2Model($classVo, $data);
         //检查Vo是否存在验证器
-        //检查验证器是否存在
-        if ($vo->getRequestValidator() !== '' && class_exists($vo->getRequestValidator())) {
+        if (! empty($vo->valid())) {
+            $validClazz = $vo->valid()[0];
+            $validScene = $vo->valid()[1];
             /** @var Validate $validator */
-            $validateClass = new \ReflectionClass($vo->getRequestValidator());
+            $validateClass = new \ReflectionClass($validClazz);
             $validator = $validateClass->newInstance();
-            if (! $validator->scene($vo->getRequestScene())->check($data)) {
+            if (! $validator->scene($validScene)->check($data)) {
                 throw new ValidateException($validator->getError());
             }
         }

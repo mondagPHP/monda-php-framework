@@ -12,6 +12,7 @@ use framework\exception\RouteNotFoundException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
+use Illuminate\Pagination\Paginator;
 
 /**
  * Class Router.
@@ -61,7 +62,7 @@ class Router
         $method = $this->method;
 
         //分配路由
-        $routerDispatch = static function (RequestInterface $request) use ($controllerInstance, $method) {
+        $routerDispatch = function (RequestInterface $request) use ($controllerInstance, $method) {
             $requestParams = $request->getRequestParams();
             $inputParams = [];
             //反射获取参数
@@ -100,6 +101,15 @@ class Router
      */
     private function parseURL(RequestInterface $request): void
     {
+        //解析paginator
+        $page = (int)$request->getParameter('page', 1);
+        if ($page <= 0) {
+            $page = 1;
+        }
+        Paginator::currentPageResolver(function () use ($page) {
+            return $page;
+        });
+
         $defaultUrlArr = Container::getContainer()->get('config')->get('app.default_url');
         //优先处理短链接映射
         $requestUri = $request->getUri();
