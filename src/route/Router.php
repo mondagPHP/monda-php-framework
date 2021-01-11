@@ -44,9 +44,9 @@ class Router
     public function dispatch(RequestInterface $request)
     {
         $this->parseURL($request);
-        $controller = "app\\modules\\{$this->module}\\action\\" . ucfirst(str_replace('/', '\\', $this->action)) . 'Action';
+        $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
         $classExist = class_exists($controller);
-        if (! $classExist) {
+        if (!$classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
         $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
@@ -118,6 +118,11 @@ class Router
             $pathInfo = explode('/', $urlInfo['path']);
             array_shift($pathInfo);
             $pathCount = count($pathInfo);
+
+            if (isset($pathInfo[$pathCount - 2])) {
+                $pathInfo[$pathCount - 2] = ucfirst($pathInfo[$pathCount - 2]);
+            }
+
             if (isset($pathInfo[0])) {
                 $this->module = $pathInfo[0];
             }
@@ -143,13 +148,13 @@ class Router
             }
         }
         //如果没有任何参数，则访问默认页面。如http://www.framework.my这种格式
-        if (! $this->module) {
+        if (!$this->module) {
             $this->module = $defaultUrlArr['module'];
         }
-        if (! $this->action) {
+        if (!$this->action) {
             $this->action = $defaultUrlArr['action'];
         }
-        if (! $this->method) {
+        if (!$this->method) {
             $this->method = $defaultUrlArr['method'];
         }
     }
