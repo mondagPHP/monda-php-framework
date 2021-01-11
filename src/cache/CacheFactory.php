@@ -25,7 +25,7 @@ class CacheFactory
     {
         $config = config('cache');
         $type = $type === null ? $config['default'] : strtolower($type);
-        if (! isset(self::$instances[$type])) {
+        if (!isset(self::$instances[$type])) {
             switch ($type) {
                 case 'file':
                     self::$instances[$type] = new FileCache($config['file']['cache_dir']);
@@ -38,5 +38,28 @@ class CacheFactory
             }
         }
         return self::$instances[$type];
+    }
+
+
+    /**
+     * @param $classPath
+     * @return mixed
+     */
+    public static function create($classPath)
+    {
+        $config = config('cache');
+        switch ($classPath) {
+            case FileCache::class:
+                self::$instances['file'] = new FileCache($config['file']['cache_dir']);
+                return self::$instances['file'];
+                break;
+            case RedisCache::class:
+                self::$instances['redis'] = new RedisCache(Redis::getInstance());
+                return self::$instances['redis'];
+                break;
+            default:
+                throw new \RuntimeException('找不到cache的驱动');
+        }
+
     }
 }
