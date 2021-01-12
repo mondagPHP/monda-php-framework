@@ -47,7 +47,7 @@ class Router
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
 
         $classExist = class_exists($controller);
-        if (!$classExist) {
+        if (! $classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
         $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
@@ -70,7 +70,11 @@ class Router
             $reflectionParams = $reflectionMethod->getParameters();
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 if (isset($requestParams[$reflectionParam->getName()])) {
-                    $inputParams[] = $requestParams[$reflectionParam->getName()];
+                    $param = $requestParams[$reflectionParam->getName()];
+                    if (is_string($param)) {
+                        $param = trim($param);
+                    }
+                    $inputParams[] = $param;
                 } else {
                     //对象
                     if (($reflectionParamClass = $reflectionParam->getClass()) !== null) {
@@ -147,13 +151,13 @@ class Router
             }
         }
         //如果没有任何参数，则访问默认页面。如http://www.framework.my这种格式
-        if (!$this->module) {
+        if (! $this->module) {
             $this->module = $defaultUrlArr['module'];
         }
-        if (!$this->action) {
+        if (! $this->action) {
             $this->action = ucfirst($defaultUrlArr['action']);
         }
-        if (!$this->method) {
+        if (! $this->method) {
             $this->method = $defaultUrlArr['method'];
         }
     }
