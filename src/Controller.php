@@ -11,7 +11,7 @@ namespace framework;
  */
 abstract class Controller
 {
-    protected $middleware = [];
+    protected static $middleware = [];
 
     /**
      * 注册initialize方法
@@ -25,8 +25,8 @@ abstract class Controller
     }
 
     // 获取中间件
-    public function getMiddleware(): array
+    public static function getMiddleware(): array
     {
-        return $this->middleware;
+        return static::$middleware;
     }
 }
