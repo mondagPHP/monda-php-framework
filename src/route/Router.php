@@ -39,12 +39,13 @@ class Router
      * @return mixed
      *               更具request执行路由
      * @throws RouteNotFoundException
-     * @throws HeroException
+     * @throws HeroException|\ReflectionException
      */
     public function dispatch(RequestInterface $request)
     {
         $this->parseURL($request);
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
+
         $classExist = class_exists($controller);
         if (!$classExist) {
             throw new RouteNotFoundException('找不到路由!');
@@ -57,15 +58,13 @@ class Router
         if (isset($middlewareConfig[strtolower($this->module)])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig[strtolower($this->module)]);
         }
-        $controllerInstance = new $controller();
-        $middleware = array_merge($globalMiddleware, $controllerInstance->getMiddleware()); // 合并控制器中间件
+        $middleware = array_merge($globalMiddleware, call_user_func([$controller,'getMiddleware'])); // 合并控制器中间件
         $method = $this->method;
-
         //分配路由
-        $routerDispatch = function (RequestInterface $request) use ($controllerInstance, $method) {
+        $routerDispatch = function (RequestInterface $request) use ($controller, $method) {
             $requestParams = $request->getRequestParams();
             $inputParams = [];
-            //反射获取参数
+            $controllerInstance = new $controller;
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
@@ -152,7 +151,7 @@ class Router
             $this->module = $defaultUrlArr['module'];
         }
         if (!$this->action) {
-            $this->action = $defaultUrlArr['action'];
+            $this->action = ucfirst($defaultUrlArr['action']);
         }
         if (!$this->method) {
             $this->method = $defaultUrlArr['method'];
