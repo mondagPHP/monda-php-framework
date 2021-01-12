@@ -13,12 +13,17 @@
     "ext-openssl": "*",
     "ext-mbstring": "*",
     "ext-gd": "*",
+    "ext-curl": "*",
     "psr/container": "^1.0",
     "predis/predis": "^1.1",
     "psr/log": "^1.1",
     "vlucas/phpdotenv": "^3.4",
-    "illuminate/database": "v5.8.36",
-    "spatie/async": "^1.5"
+    "illuminate/database": "5.8.*",
+    "illuminate/events": "5.8.*",
+    "illuminate/pagination": "5.8.*"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.14"
   },
   "autoload": {
     "psr-4": {
@@ -33,5 +38,8 @@
       "type": "composer",
       "url": "https://mirrors.aliyun.com/composer"
     }
+  },
+  "scripts": {
+    "cs-fix": "composer dump -o && php-cs-fixer fix $1"
   }
 }

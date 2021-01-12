@@ -9,7 +9,9 @@ namespace framework\vo;
  */
 interface RequestVoInterface
 {
-    public function getRequestValidator(): string;
-
-    public function getRequestScene(): string;
+    /**
+     * @return array
+     * $arr = [验证器类, 方法];
+     */
+    public function valid(): array;
 }

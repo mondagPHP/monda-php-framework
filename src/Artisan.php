@@ -2,8 +2,6 @@
 
 namespace framework;
 
-use framework\schedule\TaskList;
-
 /**
  * Class Artisan
  * @package framework
@@ -39,6 +37,24 @@ class Artisan
                 printError('找不到任务!');
             }
         }
+        if (isset($opts['cron'])) { //运行任务
+            try {
+                $cronPath = $opts['cron'];
+                $pos = strrpos($cronPath, "\\");
+                if ($pos === false) {
+                    $className = ucfirst($opts['run']) . 'Task';
+                } else {
+                    $className = substr($cronPath, 0, $pos + 1) . ucfirst(substr($cronPath, $pos + 1)) . 'Task';
+                }
+
+                $clazz = new \ReflectionClass("app\\cron\\{$className}");
+                $method = $clazz->getMethod('run');
+                $method->invoke($clazz->newInstance());
+            } catch (\ReflectionException $exception) {
+                printError('找不到任务!');
+            }
+        }
+
     }
 
     /**

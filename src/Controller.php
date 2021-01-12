@@ -11,21 +11,22 @@ namespace framework;
  */
 abstract class Controller
 {
-    protected $middleware = [];
-
-    // 获取中间件
-    public function getMiddleware(): array
-    {
-        return $this->middleware;
-    }
+    protected static $middleware = [];
 
     /**
-     * @param $method
-     * @param $parameters
-     * @return mixed
+     * 注册initialize方法
+     * Controller constructor.
      */
-    public function callAction($method, $parameters)
+    public function __construct()
     {
-        return call_user_func_array([$this, $method], $parameters);
+        if (method_exists($this, '_initialize')) {
+            $this->_initialize();
+        }
+    }
+
+    // 获取中间件
+    public static function getMiddleware(): array
+    {
+        return static::$middleware;
     }
 }

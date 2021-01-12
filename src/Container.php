@@ -8,7 +8,6 @@ namespace framework;
 
 use app\exception\HandleException;
 use Closure;
-use framework\cache\Cache;
 use framework\config\Config;
 use framework\log\Logger;
 use framework\response\Response;
@@ -89,7 +88,7 @@ class Container implements ContainerInterface
     {
         if (! $concrete instanceof Closure) {
             // 如果具体实现不是闭包  那就生成闭包
-            $concrete = static function ($app) use ($concrete) {
+            $concrete = function ($app) use ($concrete) {
                 /* @var Container $app */
                 return $app->build($concrete);
             };
@@ -153,7 +152,6 @@ class Container implements ContainerInterface
             'router' => Router::class,
             'pipeline' => PipeLine::class,
             'exception' => HandleException::class,
-            'cache' => Cache::class,
             ViewInterface::class => HerosphpView::class,
         ];
         foreach ($registers ?? [] as $name => $concrete) {
@@ -166,7 +164,6 @@ class Container implements ContainerInterface
      */
     protected function boot(): void
     {
-        //初始化配置文件文件
         self::getContainer()->get('config')->init();
         self::getContainer()->get('exception')->init();
         self::getContainer()->get(ViewInterface::class)->init();

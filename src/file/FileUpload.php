@@ -2,7 +2,6 @@
 
 namespace framework\file;
 
-use framework\exception\HeroException;
 use framework\exception\UploadException;
 
 /**
@@ -14,7 +13,7 @@ class FileUpload
     /**
      * @var array 上传文件配置参数
      */
-    protected $config = array(
+    protected $config = [
         //允许上传的文件类型
         'allow_ext' => 'jpg|jpeg|png|gif|txt|pdf|rar|zip|swf|bmp|c|java|mp3',
         //图片的最大宽度, 0没有限制
@@ -23,7 +22,7 @@ class FileUpload
         'max_height' => 0,
         //文件的最大尺寸
         'max_size' => 1024000,     /* 文件size的最大 1MB */
-    );
+    ];
 
     /**
      * @var string 原生文件名称
@@ -34,7 +33,6 @@ class FileUpload
      * @var string 临时文件名
      */
     private $tmpName;
-
 
     /**
      * FileUpload constructor.
@@ -55,8 +53,8 @@ class FileUpload
      */
     public function move(string $path)
     {
-        if (!$this->checkUploadDir($path)) {
-            throw new UploadException("上传的目录创建失败,请检查目录权限");
+        if (! $this->checkUploadDir($path)) {
+            throw new UploadException('上传的目录创建失败,请检查目录权限');
         }
         $newFilePath = $path . DIRECTORY_SEPARATOR . $this->getNewFileName($this->fileName);
         if (move_uploaded_file($this->tmpName, $newFilePath)) {
@@ -65,50 +63,35 @@ class FileUpload
         return false;
     }
 
-
     /**
      * @param array $config
      * @return $this
      * @throws UploadException
      */
-    public function isValid($config = []): FileUpload
+    public function isValid($config = []): self
     {
         $this->config = array_merge($this->config, $config);
         //检测文件格式允许
         if ($this->config['allow_ext'] !== '*') {
             $_ext = strtolower($this->getFileExt($this->fileName));
-            $_allow_ext = explode("|", $this->config['allow_ext']);
-            if (!in_array($_ext, $_allow_ext, true)) {
-                throw new UploadException("不允许的文件类型!");
+            $_allow_ext = explode('|', $this->config['allow_ext']);
+            if (! in_array($_ext, $_allow_ext, true)) {
+                throw new UploadException('不允许的文件类型!');
             }
         }
         //检测大小
         if (filesize($this->fileName) > $this->config['max_size']) {
-            throw new UploadException("文件超出大小限制!");
+            throw new UploadException('文件超出大小限制!');
         }
         //如果是图片还要检查图片的宽度和高度是否超标
         $size = getimagesize($this->fileName);
         if ($size !== false) {
             if (($this->config['max_width'] > 0 && $size[0] > $this->config['max_width'])
                 || ($this->config['max_height'] > 0 && $size[1] > $this->config['max_height'])) {
-                throw new UploadException("文件尺寸超出了限制!");
+                throw new UploadException('文件尺寸超出了限制!');
             }
         }
         return $this;
-    }
-
-
-    /**
-     * 检测上传目录
-     * @param string $path
-     * @return bool
-     */
-    protected function checkUploadDir(string $path): bool
-    {
-        if (!file_exists($path)) {
-            return self::makeFileDirs($path);
-        }
-        return true;
     }
 
     /**
@@ -123,26 +106,12 @@ class FileUpload
         $_dir = '';
         foreach ($files as $value) {
             $_dir .= $value . DIRECTORY_SEPARATOR;
-            if (!file_exists($_dir) && !mkdir($_dir) && !is_dir($_dir)) {
+            if (! file_exists($_dir) && ! mkdir($_dir) && ! is_dir($_dir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $_dir));
             }
         }
         return true;
-
     }
-
-
-    /**
-     * 获取文件名后缀
-     * @param $filename
-     * @return string
-     */
-    private function getFileExt($filename): string
-    {
-        $_pos = strrpos($filename, '.');
-        return strtolower(substr($filename, $_pos + 1));
-    }
-
 
     /**
      * 获取新的文件名
@@ -154,5 +123,29 @@ class FileUpload
     {
         $_ext = $this->getFileExt($filename);
         return time() . '-' . random_int(100000, 999999) . '.' . $_ext;
+    }
+
+    /**
+     * 检测上传目录
+     * @param string $path
+     * @return bool
+     */
+    protected function checkUploadDir(string $path): bool
+    {
+        if (! file_exists($path)) {
+            return self::makeFileDirs($path);
+        }
+        return true;
+    }
+
+    /**
+     * 获取文件名后缀
+     * @param $filename
+     * @return string
+     */
+    private function getFileExt($filename): string
+    {
+        $_pos = strrpos($filename, '.');
+        return strtolower(substr($filename, $_pos + 1));
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace framework\cookie;
+
 /**
  * Class Cookie
  * cookie 操作类
@@ -14,12 +15,11 @@ class Cookie
      * @param $options array 选项
      * @return 无
      */
-    public static function set($name, $value, $expire = 0, $path = "", $domain = "", $secure = false, $httponly = false): bool
+    public static function set($name, $value, $expire = 0, $path = '', $domain = '', $secure = false, $httponly = false): bool
     {
         $value = self::_encrypt(json_encode($value), 'E', config('app.app_key'));
         return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
     }
-
 
     /**
      * 删除cookie
@@ -29,12 +29,11 @@ class Cookie
      * @param bool $secure
      * @param bool $httponly
      */
-    public static function delete($name, $path = "", $domain = "", $secure = false, $httponly = false): void
+    public static function delete($name, $path = '', $domain = '', $secure = false, $httponly = false): void
     {
         setcookie($name, '', time() - 3600, $path, $domain, $secure, $httponly);
         unset($_COOKIE[$name]);
     }
-
 
     /**
      * 取出cookie
@@ -44,7 +43,7 @@ class Cookie
      */
     public static function get($name, $default = null)
     {
-        if (!isset($_COOKIE[$name])) {
+        if (! isset($_COOKIE[$name])) {
             return $default;
         }
         $value = $_COOKIE[$name];
@@ -59,7 +58,7 @@ class Cookie
         $key_length = strlen($key);
         $string = $operation === 'D' ? base64_decode($string) : substr(md5($string . $key), 0, 8) . $string;
         $string_length = strlen($string);
-        $randKey = $box = array();
+        $randKey = $box = [];
         $result = '';
         for ($i = 0; $i <= 255; $i++) {
             $randKey[$i] = ord($key[$i % $key_length]);

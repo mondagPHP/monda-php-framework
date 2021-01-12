@@ -6,7 +6,6 @@
 
 namespace framework\request;
 
-use framework\exception\HeroException;
 use framework\exception\UploadException;
 use framework\file\FileUpload;
 
@@ -47,7 +46,7 @@ class FpmRequest implements RequestInterface
         $requestParams = array_merge($_GET, $_POST);
         if (isset($headers['HTTP_CONTENT_TYPE']) && $headers['HTTP_CONTENT_TYPE'] === 'application/json') {
             $json = json_decode(file_get_contents('php://input'), 1);
-            if (!is_null($json)) {
+            if (! is_null($json)) {
                 $requestParams += $json;
             }
         }
@@ -93,7 +92,7 @@ class FpmRequest implements RequestInterface
 
     public function getParameter(string $name, $default = null)
     {
-        return isset($this->parameters[$name]) ?? is_callable($default) ? $default() : $default;
+        return isset($this->requestParams[$name]) ? $this->requestParams[$name] : $default;
     }
 
     /**
@@ -138,9 +137,28 @@ class FpmRequest implements RequestInterface
         $localFile = $_FILES[$formKey]['name'];
         $tempFile = $_FILES[$formKey]['tmp_name'];//原来是这样
         // 函数判断指定的文件是否是通过 HTTP POST 上传的。
-        if (!is_uploaded_file($tempFile)) {
-            throw new UploadException("上传的方式错误!");
+        if (! is_uploaded_file($tempFile)) {
+            throw new UploadException('上传的方式错误!');
         }
         return new FileUpload($localFile, $tempFile);
+    }
+
+    public function getFullUrl(): string
+    {
+        $requestUri = '';
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $requestUri = $_SERVER['REQUEST_URI'];
+        } else {
+            if (isset($_SERVER['argv'])) {
+                $requestUri = $_SERVER['PHP_SELF'] . '?' . $_SERVER['argv'][0];
+            } elseif (isset($_SERVER['QUERY_STRING'])) {
+                $requestUri = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
+            }
+        }
+        $scheme = empty($_SERVER['HTTPS']) ? '' : ($_SERVER['HTTPS'] == 'on') ? 's' : '';
+        $protocol = strstr(strtolower($_SERVER['SERVER_PROTOCOL']), '/', true) . $scheme;       //端口还是蛮重要的，毕竟需要兼容特殊的场景
+        $port = ($_SERVER['SERVER_PORT'] == '80') ? '' : (':' . $_SERVER['SERVER_PORT']);
+        # 获取的完整url
+        return $protocol . '://' . $_SERVER['SERVER_NAME'] . $port . $requestUri;
     }
 }

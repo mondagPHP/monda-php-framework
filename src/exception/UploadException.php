@@ -1,6 +1,5 @@
 <?php
 
-
 namespace framework\exception;
 
 /**
@@ -10,5 +9,4 @@ namespace framework\exception;
  */
 class UploadException extends HeroException
 {
-
 }

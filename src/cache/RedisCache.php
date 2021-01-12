@@ -3,6 +3,7 @@
  * This file is part of Monda-PHP.
  *
  */
+
 namespace framework\cache;
 
 use Closure;
@@ -29,7 +30,7 @@ class RedisCache implements ICache
     public function get(string $key, $default = null)
     {
         $result = $this->redis->get($key);
-        return ! is_null($result) ? $result : (is_callable($default) ? call_user_func($default) : $default);
+        return ! is_null($result) ? $result : $default;
     }
 
     /**
@@ -45,7 +46,7 @@ class RedisCache implements ICache
         } else {
             $r = $this->redis->set($key, $content);
         }
-        return (bool) $r;
+        return (bool)$r;
     }
 
     /**
@@ -55,7 +56,7 @@ class RedisCache implements ICache
      */
     public function delete(string $key): bool
     {
-        return (bool) $this->redis->del($key);
+        return (bool)$this->redis->del($key);
     }
 
     /**
