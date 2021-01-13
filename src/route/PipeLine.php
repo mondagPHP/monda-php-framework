@@ -53,8 +53,8 @@ class PipeLine
     public function run(Closure $initial): Closure
     {
         return array_reduce(array_reverse($this->classes), function ($res, $currClass) {
-            return function ($request) use ($res, $currClass) {
-                return (new $currClass())->{$this->handleMethod}($request, $res);
+            return function ($request, ...$cusArgs) use ($res, $currClass) {
+                return (new $currClass())->{$this->handleMethod}($request, $res, ...$cusArgs);
             };
         }, $initial);
     }

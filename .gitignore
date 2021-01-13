@@ -11,3 +11,5 @@ codeCoverage/
 vendor/
 .phpintel/
 .DS_Store
+*.lock
+phpunitTestRet/
