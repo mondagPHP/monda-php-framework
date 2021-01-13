@@ -104,15 +104,6 @@ class Router
      */
     private function parseURL(RequestInterface $request): void
     {
-        //解析paginator
-        $page = (int)$request->getParameter('page', 1);
-        if ($page <= 0) {
-            $page = 1;
-        }
-        Paginator::currentPageResolver(function () use ($page) {
-            return $page;
-        });
-
         $defaultUrlArr = Container::getContainer()->get('config')->get('app.default_url');
         //优先处理短链接映射
         $requestUri = $request->getUri();
