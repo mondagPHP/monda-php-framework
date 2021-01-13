@@ -55,4 +55,39 @@ class FileUtils
         }
         return false;
     }
+    /**
+     * 遍历目录，返回目录文件相对路径
+     * @param $dir
+     * @return array
+     */
+    public static function dirTraversal($dir): array
+    {
+        $files = array();
+        self::getDirFiles($dir, '', $files);
+        return $files;
+    }
+
+    /**
+     * 获取目录文件
+     * @param $absolute_dir //目录绝对路径
+     * @param $relative_dir //目录相对路径
+     * @param $files
+     */
+    private static function getDirFiles($absolute_dir, $relative_dir, &$files): void
+    {
+        $handler = opendir($absolute_dir);
+        if ( $handler !== false ) {
+            while ( $filename = readdir($handler) ) {
+                if ( $filename !== "." && $filename !== ".." ) {
+                    if ( is_dir($absolute_dir."/".$filename) ) {
+                        self::getDirFiles($absolute_dir."/".$filename, $relative_dir.$filename."/", $files);
+                    } else {
+                        $files[] = $relative_dir.$filename;
+                    }
+                }
+            }
+            closedir($handler);
+        }
+    }
+
 }
