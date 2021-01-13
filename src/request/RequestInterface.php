@@ -19,6 +19,9 @@ interface RequestInterface
 
     public function getUri(); // 获取请求url
 
+    //获取全路径
+    public function getFullUrl(): string;
+
     public function getMethod(); // 获取请求方法
 
     public function getHeaders(); // 获取请求头

@@ -1,12 +1,11 @@
 <?php
 
-
-namespace framework\util;
-
+namespace framework\log;
 
 use framework\Container;
 
 /**
+ * 快捷类，兼容之前的方法
  * Class Log
  * @package framework\util
  * @method static void debug(string $str, array $context = [])
@@ -19,14 +18,12 @@ use framework\Container;
  */
 class Log
 {
-
     /**
      * @param $name
      * @param $arguments
      */
     public static function __callStatic($name, $arguments): void
     {
-
         Container::getContainer()->get('log')->{$name}(...$arguments);
     }
 }

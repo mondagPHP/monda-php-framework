@@ -15,14 +15,24 @@ class Loader
 {
     /**
      * @param $serviceClass
-     * @param bool $singleton
+     * @param bool $isSingleton
      * @return mixed
      */
-    public static function service($serviceClass, $singleton = true)
+    public static function service($serviceClass, $isSingleton = true)
     {
-        if (! Container::getContainer()->has($serviceClass)) {
-            Container::getContainer()->bind($serviceClass, $serviceClass, $singleton);
+        if (!Container::getContainer()->has($serviceClass)) {
+            Container::getContainer()->bind($serviceClass, $serviceClass, $isSingleton);
         }
         return Container::getContainer()->get($serviceClass);
+    }
+
+
+    /**
+     * @param $serviceClass
+     * @return mixed
+     */
+    public static function singleton($serviceClass)
+    {
+        return static::service($serviceClass, true);
     }
 }

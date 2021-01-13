@@ -3,10 +3,12 @@
  * This file is part of Monda-PHP.
  *
  */
+
 namespace framework\cache;
 
 use framework\exception\HeroException;
 use framework\file\FileUtils;
+use framework\log\Log;
 
 /**
  * Class FileCache.
@@ -20,23 +22,12 @@ class FileCache implements ICache
     private $dir;
 
     /**
-     * 权限.
-     * @var
-     */
-    private $mode;
-
-    /**
      * FileCache constructor.
      * @param $dir
-     * @param $per
      */
-    public function __construct($dir, $per)
+    public function __construct($dir)
     {
         $this->dir = $dir;
-        $this->mode = $per;
-        if (! $this->mkdir($this->dir, $this->mode)) {
-            trigger_error("can't create cache director {$this->dir}", E_USER_WARNING);
-        }
     }
 
     /**
@@ -48,7 +39,7 @@ class FileCache implements ICache
     {
         $filename = $this->getFilename($key);
         if (file_exists($filename) && ! unlink($filename)) {
-            trigger_error("can't remove cache file {$filename}", E_USER_WARNING);
+            Log::error("can't remove cache file {$filename}");
             return false;
         }
 
@@ -66,15 +57,18 @@ class FileCache implements ICache
         $filename = $this->getFilename($key);
         try {
             if (! file_exists($filename)) {
-                throw new \RuntimeException("file not found {$filename}");
+                Log::error("file not found {$filename}");
+                throw new HeroException("file not found {$filename}");
             }
             $meta = $this->getMeta($filename);
-            if ($meta && (int) $meta['ex'] !== 0 && ($meta['ex'] < microtime(true))) {
+            if ($meta && (int)$meta['ex'] !== 0 && ($meta['ex'] < microtime(true))) {
                 unlink($filename);
+                Log::error("file expire {$filename}");
                 throw new HeroException("file expire {$filename}");
             }
             $h = fopen($filename, 'rb');
             if ($h === false) {
+                Log::error("file not readable {$filename}");
                 throw new HeroException("file not readable {$filename}");
             }
             $result = '';
@@ -86,9 +80,9 @@ class FileCache implements ICache
             if ($meta && $meta['sr']) {
                 $result = unserialize($result);
             }
-        } catch (\Exception $e) {
+        } catch (HeroException $e) {
         }
-        return ! is_null($result) ? $result : (is_callable($default) ? call_user_func($default) : $default);
+        return ! is_null($result) ? $result : $default;
     }
 
     /**
@@ -103,8 +97,8 @@ class FileCache implements ICache
         $expire = $expire ? (time() + $expire) : 0;
         if (! file_exists($filename)) {
             $dir = dirname($filename);
-            if (! $this->mkdir($dir, $this->mode)) {
-                trigger_error("can't create cache director: {$dir}", E_USER_WARNING);
+            if (! $this->mkdir($dir)) {
+                Log::error("can't create cache director: {$dir}");
                 return false;
             }
         }
@@ -113,15 +107,7 @@ class FileCache implements ICache
             $content = serialize($content);
         }
         $meta = json_encode(['ex' => $expire, 'cr' => time(), 'sr' => $isSerialize], 1);
-        $h = fopen($filename, 'wb');
-        if (! $h) {
-            trigger_error("can't create cache file: {$filename}", E_USER_WARNING);
-            return false;
-        }
-        fwrite($h, $meta . PHP_EOL . $content);
-        fclose($h);
-        chmod($filename, $this->mode);
-
+        file_put_contents($filename, $meta . PHP_EOL . $content);
         return true;
     }
 
@@ -168,7 +154,7 @@ class FileCache implements ICache
                 if ($meta && ($meta['ex'] != 0)
                     && ($meta['ex'] < microtime(true))) {
                     if (file_exists($filename) && ! unlink($filename)) {
-                        trigger_error("can't delete cache file {$filename}", E_USER_WARNING);
+                        Log::error("can't delete cache file {$filename}");
                     }
                 }
             }
@@ -202,7 +188,7 @@ class FileCache implements ICache
         }
         $fh = fopen($filename, 'rb');
         if (! $fh) {
-            trigger_error("can't open file {$filename}", E_USER_WARNING);
+            Log::error("can't open file {$filename}");
             return [];
         }
         $line = fgets($fh);
@@ -217,11 +203,11 @@ class FileCache implements ICache
      * @param int $perm
      * @return bool
      */
-    private function mkdir(string $dir, int $perm): bool
+    private function mkdir(string $dir): bool
     {
-        if (! is_dir($dir) && FileUtils::makeFileDirs($dir)) {
-            chmod($dir, $perm);
+        if (is_dir($dir)) {
+            return true;
         }
-        return is_dir($dir);
+        return ! is_dir($dir) && FileUtils::makeFileDirs($dir);
     }
 }

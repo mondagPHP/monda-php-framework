@@ -2,8 +2,6 @@
 
 namespace framework;
 
-use framework\schedule\TaskList;
-
 /**
  * Class Artisan
  * @package framework
@@ -13,7 +11,8 @@ class Artisan
     private static $SHORT_OPS = 'hv';
 
     private static $LONG_OPTS = [
-        'run:' => '执行一个客户脚本，参数是任务名称'
+        'run:' => '执行一个客户脚本，参数是任务名称',
+        'cron:' => '执行一个定时任务脚本，参数是任务名称',
     ];
 
     /**
@@ -33,6 +32,23 @@ class Artisan
             try {
                 $className = ucfirst($opts['run']) . 'Task';
                 $clazz = new \ReflectionClass("app\\client\\{$className}");
+                $method = $clazz->getMethod('run');
+                $method->invoke($clazz->newInstance());
+            } catch (\ReflectionException $exception) {
+                printError('找不到任务!');
+            }
+        }
+        if (isset($opts['cron'])) { //运行任务
+            try {
+                $cronPath = $opts['cron'];
+                $pos = strrpos($cronPath, '\\');
+                if ($pos === false) {
+                    $className = ucfirst($opts['cron']) . 'Task';
+                } else {
+                    $className = substr($cronPath, 0, $pos + 1) . ucfirst(substr($cronPath, $pos + 1)) . 'Task';
+                }
+
+                $clazz = new \ReflectionClass("app\\cron\\{$className}");
                 $method = $clazz->getMethod('run');
                 $method->invoke($clazz->newInstance());
             } catch (\ReflectionException $exception) {

@@ -2,7 +2,11 @@
 
 namespace framework\db;
 
+use framework\log\Log;
+use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Events\Dispatcher;
 
 /**
  * Class Connection
@@ -27,6 +31,7 @@ class Connection
             if (! isset(self::$fired[$connection])) {
                 $capsule = new Manager();
                 $capsule->addConnection($config, $connection);
+
                 self::setConnectionFired($connection, $capsule);
             } else {
                 /** @var Manager $capsule */
@@ -34,6 +39,19 @@ class Connection
             }
             $capsule->bootEloquent();
             $capsule->setAsGlobal();
+
+            if (config('app.app_debug', true)) {
+                $capsule->setEventDispatcher(new Dispatcher(new Container));
+                //添加监听事件
+                /** @var Dispatcher $dispatcher */
+                $dispatcher = $capsule->getEventDispatcher();
+                if (! $dispatcher->hasListeners(QueryExecuted::class)) {
+                    $dispatcher->listen(QueryExecuted::class, function ($query) {
+                        $sql = vsprintf(str_replace('?', "'%s'", $query->sql), $query->bindings) . " \t[" . $query->time . ' ms] ';
+                        Log::debug($sql);
+                    });
+                }
+            }
             self::$currConnection = $connection;
         }
     }

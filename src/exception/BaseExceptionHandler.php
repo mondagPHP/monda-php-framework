@@ -3,8 +3,10 @@
  * This file is part of Monda-PHP.
  *
  */
+
 namespace framework\exception;
 
+use framework\log\Log;
 use Throwable;
 
 /**
@@ -22,6 +24,27 @@ class BaseExceptionHandler
     {
         set_exception_handler([$this, 'handleException']);
         set_error_handler([$this, 'handleError']);
+    }
+
+    /**
+     * @param $errorLevel
+     * @param $errorMessage
+     * @param $errorFile
+     * @param $errorLine
+     * @param $errorContext
+     * https://www.runoob.com/php/php-error.html
+     * @throws \ErrorException
+     */
+    public function handleError($errorLevel, $errorMessage, $errorFile, $errorLine, $errorContext): void
+    {
+        Log::error($errorMessage . ' file: ' . $errorFile . ' line: ' . $errorLine);
+        throw new \ErrorException(
+            $errorMessage,
+            $errorLevel,
+            0,
+            $errorFile,
+            $errorLine
+        );
     }
 
     /**

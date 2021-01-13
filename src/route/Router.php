@@ -12,6 +12,7 @@ use framework\exception\RouteNotFoundException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
+use Illuminate\Pagination\Paginator;
 
 /**
  * Class Router.
@@ -38,12 +39,13 @@ class Router
      * @return mixed
      *               更具request执行路由
      * @throws RouteNotFoundException
-     * @throws HeroException
+     * @throws HeroException|\ReflectionException
      */
     public function dispatch(RequestInterface $request)
     {
         $this->parseURL($request);
-        $controller = "app\\modules\\{$this->module}\\action\\" . ucfirst(str_replace('/', '\\', $this->action)) . 'Action';
+        $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
+
         $classExist = class_exists($controller);
         if (! $classExist) {
             throw new RouteNotFoundException('找不到路由!');
@@ -56,21 +58,23 @@ class Router
         if (isset($middlewareConfig[strtolower($this->module)])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig[strtolower($this->module)]);
         }
-        $controllerInstance = new $controller();
-        $middleware = array_merge($globalMiddleware, $controllerInstance->getMiddleware()); // 合并控制器中间件
+        $middleware = array_merge($globalMiddleware, call_user_func([$controller,'getMiddleware'])); // 合并控制器中间件
         $method = $this->method;
-
         //分配路由
-        $routerDispatch = static function (RequestInterface $request) use ($controllerInstance, $method) {
+        $routerDispatch = function (RequestInterface $request) use ($controller, $method) {
             $requestParams = $request->getRequestParams();
             $inputParams = [];
-            //反射获取参数
+            $controllerInstance = new $controller;
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 if (isset($requestParams[$reflectionParam->getName()])) {
-                    $inputParams[] = $requestParams[$reflectionParam->getName()];
+                    $param = $requestParams[$reflectionParam->getName()];
+                    if (is_string($param)) {
+                        $param = trim($param);
+                    }
+                    $inputParams[] = $param;
                 } else {
                     //对象
                     if (($reflectionParamClass = $reflectionParam->getClass()) !== null) {
@@ -108,6 +112,11 @@ class Router
             $pathInfo = explode('/', $urlInfo['path']);
             array_shift($pathInfo);
             $pathCount = count($pathInfo);
+
+            if (isset($pathInfo[$pathCount - 2])) {
+                $pathInfo[$pathCount - 2] = ucfirst($pathInfo[$pathCount - 2]);
+            }
+
             if (isset($pathInfo[0])) {
                 $this->module = $pathInfo[0];
             }
@@ -137,7 +146,7 @@ class Router
             $this->module = $defaultUrlArr['module'];
         }
         if (! $this->action) {
-            $this->action = $defaultUrlArr['action'];
+            $this->action = ucfirst($defaultUrlArr['action']);
         }
         if (! $this->method) {
             $this->method = $defaultUrlArr['method'];
