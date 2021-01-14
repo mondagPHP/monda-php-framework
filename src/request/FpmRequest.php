@@ -35,6 +35,10 @@ class FpmRequest implements RequestInterface
      */
     protected $referer;
 
+    protected $controller;
+
+    protected $requestMethod;
+
     protected $requestParams = [];
 
     public function __construct($uri, $method, $headers)
@@ -143,6 +147,9 @@ class FpmRequest implements RequestInterface
         return new FileUpload($localFile, $tempFile);
     }
 
+    /**
+     * @return string
+     */
     public function getFullUrl(): string
     {
         $requestUri = '';
@@ -157,8 +164,40 @@ class FpmRequest implements RequestInterface
         }
         $scheme = empty($_SERVER['HTTPS']) ? '' : ($_SERVER['HTTPS'] == 'on') ? 's' : '';
         $protocol = strstr(strtolower($_SERVER['SERVER_PROTOCOL']), '/', true) . $scheme;       //端口还是蛮重要的，毕竟需要兼容特殊的场景
-        $port = ($_SERVER['SERVER_PORT'] == '80') ? '' : (':' . $_SERVER['SERVER_PORT']);
+        $port = ($_SERVER['SERVER_PORT'] === '80') ? '' : (':' . $_SERVER['SERVER_PORT']);
         # 获取的完整url
         return $protocol . '://' . $_SERVER['SERVER_NAME'] . $port . $requestUri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerClass(): string
+    {
+        return $this->controller;
+    }
+
+    /**
+     * @param $clazz
+     */
+    public function setControllerClass($clazz): void
+    {
+        $this->controller = $clazz;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestMethod(): string
+    {
+        return $this->requestMethod;
+    }
+
+    /**
+     * @param string $method
+     */
+    public function setRequestMethod(string $method): void
+    {
+        $this->requestMethod = $method;
     }
 }
