@@ -6,9 +6,13 @@
 
 namespace framework\route;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use framework\annotation\Valid;
+use framework\annotation\ValidRequire;
 use framework\Container;
 use framework\exception\HeroException;
 use framework\exception\RouteNotFoundException;
+use framework\exception\ValidateException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
@@ -68,9 +72,16 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
+
+            //收集注解
+            $anntotionsValid = [];
+            if (defined("ANNOTATION") && ANNOTATION){
+                $anntotionsValid = $this->collectAnnotation($reflectionMethod);
+            }
             foreach ($reflectionParams ?? [] as $reflectionParam) {
-                if (isset($requestParams[$reflectionParam->getName()])) {
-                    $param = $requestParams[$reflectionParam->getName()];
+                $paramName = $reflectionParam->getName();
+                if (isset($requestParams[$paramName])) {
+                    $param = $requestParams[$paramName];
                     if (is_string($param)) {
                         $param = trim($param);
                     }
@@ -89,6 +100,11 @@ class Router
                             continue;
                         }
                     }
+                    //是否开启注解
+                    if (defined("ANNOTATION") && ANNOTATION && isset($anntotionsValid[$paramName])){
+                        throw new ValidateException($anntotionsValid[$paramName]);
+                    }
+                    //注解
                     $inputParams[] = false;
                 }
             }
@@ -96,6 +112,24 @@ class Router
             return $reflectionMethod->invokeArgs($controllerInstance, $inputParams);
         };
         return Container::getContainer()->get('pipeline')->create()->setClasses($middleware)->run($routerDispatch)($request);
+    }
+
+    /**
+     * 收集注解
+     * @param \ReflectionMethod $method
+     * @return array
+     */
+    private function collectAnnotation(\ReflectionMethod  $method){
+        $anntotaions = [];
+        $reader = new AnnotationReader();
+        $readers = $reader->getMethodAnnotations($method);
+        foreach ($readers ?? [] as $reader){
+            if (!$reader instanceof ValidRequire){
+                continue;
+            }
+            $anntotaions[$reader->name] = $reader->msg;
+        }
+        return $anntotaions;
     }
 
     /**
