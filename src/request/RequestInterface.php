@@ -38,4 +38,12 @@ interface RequestInterface
 
     //获取上传的文件
     public function getUploadFile(string $formKey): FileUpload;
+
+    public function getControllerClass();
+
+    public function setControllerClass($clazz);
+
+    public function getRequestMethod(): string;
+
+    public function setRequestMethod(string $method);
 }

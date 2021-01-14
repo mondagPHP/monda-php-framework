@@ -50,6 +50,11 @@ class Router
         if (! $classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
+
+        //设置request controller requestMethod 参数
+        $request->setControllerClass($controller);
+        $request->setRequestMethod($this->method);
+
         $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
         $globalMiddleware = [];
         if (isset($middlewareConfig['global'])) {
