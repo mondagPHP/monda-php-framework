@@ -79,15 +79,15 @@ class Router
             $reflectionParams = $reflectionMethod->getParameters();
 
             //收集注解
-            $anntotionsValid = [];
+            $annotationValid = [];
             if (defined("ANNOTATION") && ANNOTATION){
-                $anntotionsValid = $this->collectAnnotation($reflectionMethod);
+                $annotationValid = $this->collectAnnotation($reflectionMethod);
             }
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
                     $param = $requestParams[$paramName];
-                    if (is_string($requestParams[$paramName])) {
+                    if (is_scalar($requestParams[$paramName])) {
                         $param = trim($param);
                         if ($param === ''){
                             throw new ValidateException($paramName."不能为空!");
@@ -109,10 +109,9 @@ class Router
                         }
                     }
                     //是否开启注解
-                    if (defined("ANNOTATION") && ANNOTATION && isset($anntotionsValid[$paramName])){
-                        throw new ValidateException($anntotionsValid[$paramName]);
+                    if (defined("ANNOTATION") && ANNOTATION && isset($annotationValid[$paramName])){
+                        throw new ValidateException($annotationValid[$paramName]);
                     }
-                    //注解
                     $inputParams[] = false;
                 }
             }
@@ -127,17 +126,18 @@ class Router
      * @param \ReflectionMethod $method
      * @return array
      */
-    private function collectAnnotation(\ReflectionMethod  $method){
-        $anntotaions = [];
+    private function collectAnnotation(\ReflectionMethod  $method): array
+    {
+        $annotations = [];
         $reader = new AnnotationReader();
         $readers = $reader->getMethodAnnotations($method);
         foreach ($readers ?? [] as $reader){
             if (!$reader instanceof ValidRequire){
                 continue;
             }
-            $anntotaions[$reader->name] = $reader->msg;
+            $annotations[$reader->name] = $reader->msg;
         }
-        return $anntotaions;
+        return $annotations;
     }
 
     /**
