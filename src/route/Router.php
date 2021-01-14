@@ -86,9 +86,9 @@ class Router
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
-                    $param = $requestParams[$paramName];
-                    if (is_string($param)) {
-                        $param = trim($param);
+                    $param = trim($requestParams[$paramName]);
+                    if ($param === ''){
+                        throw new ValidateException($paramName."不能为空!");
                     }
                     $inputParams[] = $param;
                 } else {
