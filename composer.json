@@ -20,7 +20,8 @@
     "vlucas/phpdotenv": "^3.4",
     "illuminate/database": "5.8.*",
     "illuminate/events": "5.8.*",
-    "illuminate/pagination": "5.8.*"
+    "illuminate/pagination": "5.8.*",
+    "doctrine/annotations": "^1.6"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^2.14"
