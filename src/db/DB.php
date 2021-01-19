@@ -18,7 +18,7 @@ class DB
      */
     public static function table($table, $connection = 'default'): Builder
     {
-        Connection::fireConnection($connection);
+        Connection::fireConnection();
         return Manager::table($table, $connection);
     }
 
@@ -32,7 +32,19 @@ class DB
      */
     public static function transaction($connection, $callback, $attempts = 1)
     {
-        Connection::fireConnection($connection);
+        Connection::fireConnection();
         return Manager::connection($connection)->transaction($callback, $attempts);
+    }
+
+    /**
+     * @param $connection
+     * @param $raw
+     * @return mixed
+     * raw
+     */
+    public static function raw($connection, $raw)
+    {
+        Connection::fireConnection();
+        return Manager::connection($connection)->raw($raw);
     }
 }

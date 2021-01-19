@@ -21,7 +21,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         if (is_null($this->connection)) {
             $this->connection = 'default';
         }
-        Connection::fireConnection($this->connection);
+        Connection::fireConnection();
         parent::__construct($attributes);
     }
 }
