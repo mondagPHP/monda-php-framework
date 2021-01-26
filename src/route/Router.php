@@ -7,16 +7,16 @@
 namespace framework\route;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use framework\annotation\Valid;
+use framework\annotation\RequestMethod;
 use framework\annotation\ValidRequire;
 use framework\Container;
 use framework\exception\HeroException;
+use framework\exception\RequestMethodException;
 use framework\exception\RouteNotFoundException;
 use framework\exception\ValidateException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
-use Illuminate\Pagination\Paginator;
 
 /**
  * Class Router.
@@ -51,7 +51,7 @@ class Router
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
 
         $classExist = class_exists($controller);
-        if (! $classExist) {
+        if (!$classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
 
@@ -67,7 +67,7 @@ class Router
         if (isset($middlewareConfig[strtolower($this->module)])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig[strtolower($this->module)]);
         }
-        $middleware = array_merge($globalMiddleware, call_user_func([$controller,'getMiddleware'])); // 合并控制器中间件
+        $middleware = array_merge($globalMiddleware, call_user_func([$controller, 'getMiddleware'])); // 合并控制器中间件
         $method = $this->method;
         //分配路由
         $routerDispatch = function (RequestInterface $request) use ($controller, $method) {
@@ -77,11 +77,10 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
-
             //收集注解
             $annotationValid = [];
-            if (defined("ANNOTATION") && ANNOTATION){
-                $annotationValid = $this->collectAnnotation($reflectionMethod);
+            if (defined("ANNOTATION") && ANNOTATION) {
+                $annotationValid = $this->collectAnnotation($request, $reflectionMethod);
             }
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
@@ -89,8 +88,8 @@ class Router
                     $param = $requestParams[$paramName];
                     if (is_scalar($requestParams[$paramName])) {
                         $param = trim($param);
-                        if ($param === ''){
-                            throw new ValidateException($paramName."不能为空!");
+                        if ($param === '') {
+                            throw new ValidateException($paramName . "不能为空!");
                         }
                     }
                     $inputParams[] = $param;
@@ -109,7 +108,7 @@ class Router
                         }
                     }
                     //是否开启注解
-                    if (defined("ANNOTATION") && ANNOTATION && isset($annotationValid[$paramName])){
+                    if (defined("ANNOTATION") && ANNOTATION && isset($annotationValid[$paramName])) {
                         throw new ValidateException($annotationValid[$paramName]);
                     }
                     $inputParams[] = false;
@@ -123,16 +122,21 @@ class Router
 
     /**
      * 收集注解
+     * @param RequestInterface $request
      * @param \ReflectionMethod $method
      * @return array
      */
-    private function collectAnnotation(\ReflectionMethod  $method): array
+    private function collectAnnotation(RequestInterface $request, \ReflectionMethod $method): array
     {
         $annotations = [];
         $reader = new AnnotationReader();
+        $requestMethodAnnotation = $reader->getMethodAnnotation($method, RequestMethod::class);
+        if ($requestMethodAnnotation !== null && strtolower($request->getMethod()) !== strtolower($requestMethodAnnotation->method)) {
+            throw new RequestMethodException("请求的方法不一致，请检查!");
+        }
         $readers = $reader->getMethodAnnotations($method);
-        foreach ($readers ?? [] as $reader){
-            if (!$reader instanceof ValidRequire){
+        foreach ($readers ?? [] as $reader) {
+            if (!$reader instanceof ValidRequire) {
                 continue;
             }
             $annotations[$reader->name] = $reader->msg;
@@ -184,13 +188,13 @@ class Router
             }
         }
         //如果没有任何参数，则访问默认页面。如http://www.framework.my这种格式
-        if (! $this->module) {
+        if (!$this->module) {
             $this->module = $defaultUrlArr['module'];
         }
-        if (! $this->action) {
+        if (!$this->action) {
             $this->action = ucfirst($defaultUrlArr['action']);
         }
-        if (! $this->method) {
+        if (!$this->method) {
             $this->method = $defaultUrlArr['method'];
         }
     }
