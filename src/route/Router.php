@@ -54,7 +54,6 @@ class Router
         if (!$classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
-
         //设置request controller requestMethod 参数
         $request->setControllerClass($controller);
         $request->setRequestMethod($this->method);
@@ -79,7 +78,7 @@ class Router
             $reflectionParams = $reflectionMethod->getParameters();
             //收集注解
             $annotationValid = [];
-            if (defined("ANNOTATION") && ANNOTATION) {
+            if ($this->isSetAnnotationOn()) {
                 $annotationValid = $this->collectAnnotation($request, $reflectionMethod);
             }
             foreach ($reflectionParams ?? [] as $reflectionParam) {
@@ -108,7 +107,7 @@ class Router
                         }
                     }
                     //是否开启注解
-                    if (defined("ANNOTATION") && ANNOTATION && isset($annotationValid[$paramName])) {
+                    if ($this->isSetAnnotationOn() && isset($annotationValid[$paramName])) {
                         throw new ValidateException($annotationValid[$paramName]);
                     }
                     $inputParams[] = false;
@@ -142,6 +141,16 @@ class Router
             $annotations[$reader->name] = $reader->msg;
         }
         return $annotations;
+    }
+
+
+    /**
+     * 注解是否打开
+     * @return bool
+     */
+    private function isSetAnnotationOn(): bool
+    {
+        return defined("ANNOTATION") && ANNOTATION;
     }
 
     /**
