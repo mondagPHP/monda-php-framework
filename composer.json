@@ -32,12 +32,16 @@
   },
   "autoload": {
     "psr-4": {
-      "framework\\": "src/",
-      "framework\\tests\\": "tests/"
+      "framework\\": "src/"
     },
     "files": [
       "src/function.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "framework\\tests\\": "tests/"
+    }
   },
   "repositories": {
     "packagist": {
