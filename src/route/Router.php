@@ -7,6 +7,7 @@
 namespace framework\route;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use framework\annotation\Annotation;
 use framework\annotation\RequestMethod;
 use framework\annotation\ValidRequire;
 use framework\Container;
@@ -76,43 +77,34 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
-            //收集注解
-            $annotationValid = [];
-            if ($this->isSetAnnotationOn()) {
-                $annotationValid = $this->collectAnnotation($request, $reflectionMethod);
-            }
+
+            //注解处理
+            $annotation = new Annotation($reflectionMethod);
+            $annotation->chkRequestMethod($request->getMethod());
+
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
-                    $param = $requestParams[$paramName];
-                    if (is_scalar($requestParams[$paramName])) {
-                        $param = trim($param);
-                        if ($param === '') {
-                            throw new ValidateException($paramName . "不能为空!");
-                        }
-                    }
-                    $inputParams[] = $param;
+                    $inputParams[$paramName] = $requestParams[$paramName];
                 } else {
                     //对象
                     if (($reflectionParamClass = $reflectionParam->getClass()) !== null) {
                         //支持request
                         if ($reflectionParamClass->implementsInterface(RequestInterface::class)) {
-                            $inputParams[] = $request;
+                            $inputParams[$paramName] = $request;
                             continue;
                         }
                         //vo
                         if ($reflectionParamClass->implementsInterface(RequestVoInterface::class)) {
-                            $inputParams[] = (new RequestValidator())->valid($request, $reflectionParamClass->getName());
+                            $inputParams[$paramName] = (new RequestValidator())->valid($request, $reflectionParamClass->getName());
                             continue;
                         }
                     }
-                    //是否开启注解
-                    if ($this->isSetAnnotationOn() && isset($annotationValid[$paramName])) {
-                        throw new ValidateException($annotationValid[$paramName]);
-                    }
-                    $inputParams[] = false;
+                    $inputParams[$paramName] = false;
                 }
             }
+            //参数注解校验
+            $annotation->paramFilters($inputParams);
             //参数构造
             return $reflectionMethod->invokeArgs($controllerInstance, $inputParams);
         };
