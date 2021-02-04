@@ -79,22 +79,26 @@ class Router
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
-                    $inputParams[$paramName] = $requestParams[$paramName];
+                    $param = $requestParams[$paramName];
+                    if (is_scalar($requestParams[$paramName])) {
+                        $param = trim($param);
+                    }
+                    $inputParams[] = $param;
                 } else {
                     //对象
                     if (($reflectionParamClass = $reflectionParam->getClass()) !== null) {
                         //支持request
                         if ($reflectionParamClass->implementsInterface(RequestInterface::class)) {
-                            $inputParams[$paramName] = $request;
+                            $inputParams[] = $request;
                             continue;
                         }
                         //vo
                         if ($reflectionParamClass->implementsInterface(RequestVoInterface::class)) {
-                            $inputParams[$paramName] = (new RequestValidator())->valid($request, $reflectionParamClass->getName());
+                            $inputParams[] = (new RequestValidator())->valid($request, $reflectionParamClass->getName());
                             continue;
                         }
                     }
-                    $inputParams[$paramName] = false;
+                    $inputParams[] = false;
                 }
             }
             //参数构造
