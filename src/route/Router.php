@@ -6,15 +6,10 @@
 
 namespace framework\route;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use framework\annotation\Annotation;
-use framework\annotation\RequestMethod;
-use framework\annotation\ValidRequire;
+use framework\annotation\ActionCheck;
 use framework\Container;
 use framework\exception\HeroException;
-use framework\exception\RequestMethodException;
 use framework\exception\RouteNotFoundException;
-use framework\exception\ValidateException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
@@ -79,8 +74,7 @@ class Router
             $reflectionParams = $reflectionMethod->getParameters();
 
             //注解处理
-            $annotation = new Annotation($reflectionMethod);
-            $annotation->chkRequestMethod($request->getMethod());
+            ActionCheck::create()->check($request, $reflectionMethod);
 
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
@@ -103,8 +97,6 @@ class Router
                     $inputParams[$paramName] = false;
                 }
             }
-            //参数注解校验
-            $annotation->paramFilters($inputParams);
             //参数构造
             return $reflectionMethod->invokeArgs($controllerInstance, $inputParams);
         };

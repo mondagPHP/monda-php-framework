@@ -2,6 +2,7 @@
 namespace framework\annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
+use framework\exception\ValidateException;
 
 /**
  * 基本类型
@@ -25,5 +26,19 @@ class ValidRequire
     {
         $this->name = $param['name'] ?? '';
         $this->msg = $param['msg'] ?? '';
+    }
+
+    /**
+     * @return \Closure
+     * date 2021/2/1
+     */
+    public function check(): \Closure
+    {
+        return function (ActionCheck $actionCheck) {
+            $params = $actionCheck->request->getRequestParams();
+            if (! isset($params[$this->name])) {
+                throw new ValidateException($this->msg);
+            }
+        };
     }
 }
