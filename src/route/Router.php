@@ -112,40 +112,6 @@ class Router
     }
 
     /**
-     * 收集注解
-     * @param RequestInterface $request
-     * @param \ReflectionMethod $method
-     * @return array
-     */
-    private function collectAnnotation(RequestInterface $request, \ReflectionMethod $method): array
-    {
-        $annotations = [];
-        $reader = new AnnotationReader();
-        $requestMethodAnnotation = $reader->getMethodAnnotation($method, RequestMethod::class);
-        if ($requestMethodAnnotation !== null && strtolower($request->getMethod()) !== strtolower($requestMethodAnnotation->method)) {
-            throw new RequestMethodException("请求的方法不一致，请检查!");
-        }
-        $readers = $reader->getMethodAnnotations($method);
-        foreach ($readers ?? [] as $reader) {
-            if (!$reader instanceof ValidRequire) {
-                continue;
-            }
-            $annotations[$reader->name] = $reader->msg;
-        }
-        return $annotations;
-    }
-
-
-    /**
-     * 注解是否打开
-     * @return bool
-     */
-    private function isSetAnnotationOn(): bool
-    {
-        return defined("ANNOTATION") && ANNOTATION;
-    }
-
-    /**
      * 解析url.
      * @param RequestInterface $request
      */

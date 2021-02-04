@@ -48,6 +48,7 @@ class Annotation
         }
         foreach ($inputParams as $k => $v) {
             $this->validRequireFilter($k, $v);
+            $this->notEmptyFilter($k, $v);
             $this->voValidFilter($k, $v);
         }
     }
@@ -76,6 +77,7 @@ class Annotation
         foreach ($readers ?? [] as $reader) {
             $this->setRequestMethodAnnotation($reader);
             $this->setValidRequireAnnotation($reader);
+            $this->setNotEmptyAnnotation($reader);
             $this->setVoValidAnnotation($reader);
         }
     }
@@ -102,6 +104,18 @@ class Annotation
             return;
         }
         $this->annotations['validRequire'][$reader->name] = $reader->msg;
+    }
+
+    /**
+     * 处理NotEmpty注解类
+     * @param $reader
+     */
+    protected function setNotEmptyAnnotation($reader): void
+    {
+        if (!$reader instanceof NotEmpty) {
+            return;
+        }
+        $this->annotations['notEmpty'][$reader->name] = $reader->msg;
     }
 
     /**
@@ -133,6 +147,29 @@ class Annotation
         }
         if ($object === false) {
             throw new ValidateException($annotations[$key]);
+        }
+    }
+
+    /**
+     * NotEmpty注解类参数过滤
+     * @param string $key
+     * @param $object
+     * @throws ValidateException
+     */
+    private function notEmptyFilter(string $key, $object): void
+    {
+        $notEmptyAnnotations = $this->annotations['notEmpty'] ?? [];
+        $requireAnnotations = $this->annotations['validRequire'] ?? [];
+        if (!isset($notEmptyAnnotations[$key])) {
+            return;
+        }
+        if (!isset($requireAnnotations[$key]) && $object === false) {
+            //非必填，且没有传参可以通过校验
+            return;
+        }
+        $msg = $notEmptyAnnotations[$key] === '' ? $key . "不能为空!" : $notEmptyAnnotations[$key];
+        if (is_scalar($object) && trim($object) === '') {
+            throw new ValidateException($msg);
         }
     }
 
