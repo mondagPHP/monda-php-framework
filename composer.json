@@ -21,7 +21,8 @@
     "illuminate/database": "5.8.*",
     "illuminate/events": "5.8.*",
     "illuminate/pagination": "5.8.*",
-    "doctrine/annotations": "^1.6"
+    "doctrine/annotations": "^1.6",
+    "guzzlehttp/guzzle": "~6.0"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^2.14"
