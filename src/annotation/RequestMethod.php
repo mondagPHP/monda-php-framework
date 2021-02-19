@@ -3,6 +3,7 @@
 namespace framework\annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
+use framework\exception\RequestMethodException;
 
 /**
  * 请求方法
@@ -12,5 +13,22 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class RequestMethod
 {
-    public $method = 'get';
+    /**
+     * @Enum({"POST", "GET", "PUT", "DELETE"})
+     * @var string
+     */
+    public $method = 'GET';
+
+    /**
+     * @return \Closure
+     * date 2021/2/1
+     */
+    public function check(): \Closure
+    {
+        return function (ActionCheck $actionCheck) {
+            if (strtoupper($actionCheck->request->getMethod()) !== $this->method) {
+                throw new RequestMethodException('请求方法不对，需要是:' . $this->method);
+            }
+        };
+    }
 }

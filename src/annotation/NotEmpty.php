@@ -1,7 +1,9 @@
 <?php
+
+
 namespace framework\annotation;
 
-use Doctrine\Common\Annotations\Annotation\Target;
+
 use framework\exception\ValidateException;
 
 /**
@@ -10,16 +12,12 @@ use framework\exception\ValidateException;
  * @Annotation
  * @Target({"METHOD"})
  */
-class ValidRequire
+class NotEmpty
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     public $name;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $msg;
 
     public function __construct(array $param)
@@ -30,14 +28,14 @@ class ValidRequire
 
     /**
      * @return \Closure
-     * date 2021/2/1
      */
     public function check(): \Closure
     {
         return function (ActionCheck $actionCheck) {
             $params = $actionCheck->request->getRequestParams();
-            if (! isset($params[$this->name])) {
-                throw new ValidateException($this->msg);
+            $msg = $this->msg === '' ? $this->name . "不能为空!" : $this->msg;
+            if (isset($params[$this->name]) && is_scalar($params[$this->name]) && trim($params[$this->name]) === '') {
+                throw new ValidateException($msg);
             }
         };
     }

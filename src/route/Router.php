@@ -6,14 +6,10 @@
 
 namespace framework\route;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use framework\annotation\RequestMethod;
-use framework\annotation\ValidRequire;
+use framework\annotation\ActionCheck;
 use framework\Container;
 use framework\exception\HeroException;
-use framework\exception\RequestMethodException;
 use framework\exception\RouteNotFoundException;
-use framework\exception\ValidateException;
 use framework\request\RequestInterface;
 use framework\validate\RequestValidator;
 use framework\vo\RequestVoInterface;
@@ -76,20 +72,16 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
-            //收集注解
-            $annotationValid = [];
-            if ($this->isSetAnnotationOn()) {
-                $annotationValid = $this->collectAnnotation($request, $reflectionMethod);
-            }
+
+            //注解处理
+            ActionCheck::create()->check($request, $reflectionMethod);
+
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
                     $param = $requestParams[$paramName];
                     if (is_scalar($requestParams[$paramName])) {
                         $param = trim($param);
-                        if ($param === '') {
-                            throw new ValidateException($paramName . "不能为空!");
-                        }
                     }
                     $inputParams[] = $param;
                 } else {
@@ -106,10 +98,6 @@ class Router
                             continue;
                         }
                     }
-                    //是否开启注解
-                    if ($this->isSetAnnotationOn() && isset($annotationValid[$paramName])) {
-                        throw new ValidateException($annotationValid[$paramName]);
-                    }
                     $inputParams[] = false;
                 }
             }
@@ -117,40 +105,6 @@ class Router
             return $reflectionMethod->invokeArgs($controllerInstance, $inputParams);
         };
         return Container::getContainer()->get('pipeline')->create()->setClasses($middleware)->run($routerDispatch)($request);
-    }
-
-    /**
-     * 收集注解
-     * @param RequestInterface $request
-     * @param \ReflectionMethod $method
-     * @return array
-     */
-    private function collectAnnotation(RequestInterface $request, \ReflectionMethod $method): array
-    {
-        $annotations = [];
-        $reader = new AnnotationReader();
-        $requestMethodAnnotation = $reader->getMethodAnnotation($method, RequestMethod::class);
-        if ($requestMethodAnnotation !== null && strtolower($request->getMethod()) !== strtolower($requestMethodAnnotation->method)) {
-            throw new RequestMethodException("请求的方法不一致，请检查!");
-        }
-        $readers = $reader->getMethodAnnotations($method);
-        foreach ($readers ?? [] as $reader) {
-            if (!$reader instanceof ValidRequire) {
-                continue;
-            }
-            $annotations[$reader->name] = $reader->msg;
-        }
-        return $annotations;
-    }
-
-
-    /**
-     * 注解是否打开
-     * @return bool
-     */
-    private function isSetAnnotationOn(): bool
-    {
-        return defined("ANNOTATION") && ANNOTATION;
     }
 
     /**
