@@ -37,7 +37,7 @@ class ActionCheck
      */
     public function check(RequestInterface $request, \ReflectionMethod $method): void
     {
-        if (!$this->isDefined) {
+        if (! $this->isDefined) {
             return;
         }
         $this->request = $request;
