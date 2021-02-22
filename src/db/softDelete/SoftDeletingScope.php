@@ -42,12 +42,14 @@ class SoftDeletingScope implements Scope
             /* @var Model $model */
             $model = $builder->getModel();
 
-            if ($model->canDelete || $model->getTable() === $model->getTrashedTable()) {
-                // 回收站强制删除
-                return $builder->toBase()->delete();
-            }
+            return $model->transaction(function () use ($builder, $model) {
+                if ($model->canDelete || $model->getTable() === $model->getTrashedTable()) {
+                    // 回收站强制删除
+                    return $builder->toBase()->delete();
+                }
 
-            return $this->softDelete($builder);
+                return $this->softDelete($builder);
+            });
         });
     }
 
