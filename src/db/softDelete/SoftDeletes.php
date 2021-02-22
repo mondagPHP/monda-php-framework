@@ -2,7 +2,7 @@
 
 namespace framework\db\softDelete;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Capsule\Manager;
 use Illuminate\Support\Str;
 
 /**
@@ -67,11 +67,16 @@ trait SoftDeletes
 
         $this->canDelete = true;
 
-        $trashedModel = clone $this;
-        $trashedModel->withTrashedTable();
-        $trashedModel->delete();
+        $deleted = null;
 
-        return tap($this->delete(), function ($deleted) {
+        $this->transaction(function () use (&$deleted) {
+            $trashedModel = clone $this;
+            $trashedModel->withTrashedTable();
+            $trashedModel->delete();
+            $deleted = $this->delete();
+        });
+
+        return tap($deleted, function ($deleted) {
             $this->forceDeleting = false;
 
             if ($deleted) {
@@ -89,7 +94,7 @@ trait SoftDeletes
      */
     public function transaction(\Closure $callback)
     {
-        $connection = DB::connection($this->getConnectionName());
+        $connection = Manager::connection($this->getConnectionName());
 
         if ($connection->getPdo()->inTransaction()) {
             return $callback();
@@ -102,6 +107,7 @@ trait SoftDeletes
      * Restore a soft-deleted model instance.
      *
      * @return bool|null
+     * @throws \Throwable
      */
     public function restore()
     {
@@ -114,23 +120,25 @@ trait SoftDeletes
 
         $result = null;
 
-        $trashedModel = clone $this;
+        $this->transaction(function () use (&$result) {
+            $trashedModel = clone $this;
 
-        $trashedModel->canDelete = true;
+            $trashedModel->canDelete = true;
 
-        $trashedModel->delete();
+            $trashedModel->delete();
 
-        $this->withoutTrashedTable();
+            $this->withoutTrashedTable();
 
-        $this->{$this->getDeletedAtColumn()} = null;
-        // Once we have saved the model, we will fire the "restored" event so this
-        // developer will do anything they need to after a restore operation is
-        // totally finished. Then we will return the result of the save call.
-        $this->exists = false;
+            $this->{$this->getDeletedAtColumn()} = null;
+            // Once we have saved the model, we will fire the "restored" event so this
+            // developer will do anything they need to after a restore operation is
+            // totally finished. Then we will return the result of the save call.
+            $this->exists = false;
 
-        $result = $this->save();
+            $result = $this->save();
 
-        $this->canDelete = false;
+            $this->canDelete = false;
+        });
 
         $this->fireModelEvent('restored', false);
 
@@ -294,22 +302,25 @@ trait SoftDeletes
      * Perform the actual delete query on this model instance.
      *
      * @return void
+     * @throws \Throwable
      */
     protected function runSoftDelete(): void
     {
-        $originalModel = clone $this;
-        $originalModel->canDelete = true;
-        $originalModel->delete();
+        $this->transaction(function () {
+            $originalModel = clone $this;
+            $originalModel->canDelete = true;
+            $originalModel->delete();
 
-        $time = $this->freshTimestamp();
-        $this->{$this->getDeletedAtColumn()} = $time;
-        if ($this->timestamps && ! is_null($this->getUpdatedAtColumn())) {
-            $this->{$this->getUpdatedAtColumn()} = $time;
-        }
-        $this->withTrashedTable();
-        $this->exists = false;
-        $this->save();
-        // 已软删除，需要把 canDelete 设置为 true
-        $this->canDelete = true;
+            $time = $this->freshTimestamp();
+            $this->{$this->getDeletedAtColumn()} = $time;
+            if ($this->timestamps && ! is_null($this->getUpdatedAtColumn())) {
+                $this->{$this->getUpdatedAtColumn()} = $time;
+            }
+            $this->withTrashedTable();
+            $this->exists = false;
+            $this->save();
+            // 已软删除，需要把 canDelete 设置为 true
+            $this->canDelete = true;
+        });
     }
 }
