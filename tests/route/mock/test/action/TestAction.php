@@ -89,4 +89,18 @@ class TestAction extends Controller
     {
         return Result::ok()->data(['name' => $name, 'age' => $request->getParameter('age')]);
     }
+
+    /**
+     * @ValidRequire(name="name", msg="请传入name")
+     * @RequestMethod(method="POST")
+     * @RequestValidate(validate="framework\tests\route\mock\UserNotValidator", scene="create")
+     * @param RequestInterface $request
+     * @param string $name
+     * @return Result
+     * date 2021/2/1
+     */
+    public function notValidator(RequestInterface $request, string $name): Result
+    {
+        return Result::error();
+    }
 }

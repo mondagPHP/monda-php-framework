@@ -127,4 +127,14 @@ class RouterAnnotationTest extends TestCase
         echo $res;
     }
 
+    public function testAnnotationNotValidator(): void
+    {
+        $_GET['name'] = 'tom';
+        $_GET['age'] = 'age';
+        $request = new FpmRequest('/test/test/notValidator', 'POST', []);
+        $this->expectException(ValidateException::class);
+        $this->expectExceptionMessage('framework\tests\route\mock\UserNotValidator 不是验证类，请检查代码');
+        $this->router->dispatch($request);
+    }
+
 }
