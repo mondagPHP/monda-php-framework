@@ -14,7 +14,7 @@ use framework\exception\RequestMethodException;
 class RequestMethod
 {
     /**
-     * @Enum({"POST", "GET", "PUT", "DELETE"})
+     * @Enum({"POST", "GET", "PUT", "DELETE", "post", "get", "put", "delete"})
      * @var string
      */
     public $method = 'GET';
@@ -26,7 +26,7 @@ class RequestMethod
     public function check(): \Closure
     {
         return function (ActionCheck $actionCheck) {
-            if (strtoupper($actionCheck->request->getMethod()) !== $this->method) {
+            if (strtoupper($actionCheck->request->getMethod()) !== strtoupper($this->method)) {
                 throw new RequestMethodException('请求方法不对，需要是:' . $this->method);
             }
         };
