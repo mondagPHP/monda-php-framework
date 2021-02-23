@@ -32,6 +32,9 @@ class RequestValidate
             }
             /** @var Validate $validator */
             $validator = new $this->validate();
+            if (! $validator instanceof Validate) {
+                throw new ValidateException($this->validate . ' 不是验证类，请检查代码');
+            }
             if (! $validator->scene($this->scene)->check($actionCheck->request->getRequestParams())) {
                 throw new ValidateException($validator->getError());
             }
