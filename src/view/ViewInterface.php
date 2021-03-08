@@ -13,4 +13,7 @@ interface ViewInterface
 
     // 解析模板模板
     public function render(string $path, array $params = []): string;
+
+    // 分配变量
+    public function setTemplateVar(string $key, $templateVar): void;
 }

@@ -140,8 +140,17 @@ class HerosphpTemplate
      */
     public function render(string $path, array $params = []): string
     {
-        $this->templateVar = $params;
+        $this->templateVar = array_merge($this->templateVar, $params);
         return $this->display($path);
+    }
+
+    /**
+     * @param string $key
+     * @param array $templateVar
+     */
+    public function setTemplateVar(string $key, $templateVar): void
+    {
+        $this->templateVar[$key] = $templateVar;
     }
 
     /**

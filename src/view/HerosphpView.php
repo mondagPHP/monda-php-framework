@@ -29,4 +29,9 @@ class HerosphpView implements ViewInterface
     {
         return $this->template->render($path, $params);
     }
+
+    public function setTemplateVar(string $key, $templateVar): void
+    {
+        $this->template->setTemplateVar($key, $templateVar);
+    }
 }

@@ -52,6 +52,17 @@ if (! function_exists('view')) {
     }
 }
 
+
+/**
+ * 分配变量
+ */
+if (!function_exists('assignViewVar')) {
+    function assignViewVar(string $key, $value)
+    {
+        Container::getContainer()->get(ViewInterface::class)->setTemplateVar($key, $value);
+    }
+}
+
 /**
  * 打印函数, 打印变量(数据)
  */
