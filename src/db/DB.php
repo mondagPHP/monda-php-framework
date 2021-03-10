@@ -47,4 +47,18 @@ class DB
         Connection::fireConnection();
         return Manager::connection($connection)->raw($raw);
     }
+
+    /**
+     * 执行原生的SQL语句
+     * @param $connection
+     * @param $query
+     * @param array $bindings
+     * @param bool $useReadPdo
+     * @return array
+     */
+    public static function select($connection, $query, $bindings = [], $useReadPdo = true)
+    {
+        Connection::fireConnection();
+        return Manager::connection($connection)->select($query, $bindings, $useReadPdo);
+    }
 }
