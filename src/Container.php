@@ -6,15 +6,8 @@
 
 namespace framework;
 
-use app\exception\HandleException;
 use Closure;
-use framework\config\Config;
-use framework\log\Logger;
-use framework\response\Response;
-use framework\route\PipeLine;
-use framework\route\Router;
-use framework\view\HerosphpView;
-use framework\view\ViewInterface;
+use framework\exception\DependencyLoopException;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -39,13 +32,7 @@ class Container implements ContainerInterface
      * App constructor.
      */
     private function __construct()
-    {
-        self::$instance = $this;
-        //注册绑定
-        $this->register();
-        //服务注册，才能启动
-        $this->boot();
-    }
+    {}
 
     /**
      * @param string $id
@@ -86,11 +73,32 @@ class Container implements ContainerInterface
      */
     public function bind($id, $concrete, $isSingleton = false): void
     {
+        //依赖栈
+        $stack[$id] = 1;
+        $this->bindWithStack($id, $concrete, $isSingleton, $stack);
+    }
+
+    /**
+     * 返回当前App实例，单例.
+     */
+    public static function getContainer(): self
+    {
+        return self::$instance ?? self::$instance = new self();
+    }
+
+    /**
+     * @param $id
+     * @param $concrete
+     * @param $isSingleton
+     * @param array $stack
+     */
+    protected function bindWithStack($id, $concrete, $isSingleton, $stack = []): void
+    {
         if (! $concrete instanceof Closure) {
             // 如果具体实现不是闭包  那就生成闭包
-            $concrete = function ($app) use ($concrete) {
+            $concrete = function ($app) use ($stack, $concrete) {
                 /* @var Container $app */
-                return $app->build($concrete);
+                return $app->build($concrete, $stack);
             };
         }
         $this->binding[$id] = compact('concrete', 'isSingleton');
@@ -98,10 +106,12 @@ class Container implements ContainerInterface
 
     /**
      * @param $clazz
+     * @param $stack
      * @return object
+     * @throws DependencyLoopException
      * @throws ReflectionException
      */
-    public function build($clazz): object
+    protected function build($clazz, $stack): object
     {
         //反射对象
         $reflector = new ReflectionClass($clazz);
@@ -114,58 +124,51 @@ class Container implements ContainerInterface
         //构造函数的参数对象
         $dependencies = $constructor->getParameters();
         // 当前类的所有实例化的依赖
-        $instance = $this->getDependencies($dependencies);
+        $instance = $this->getDependencies($dependencies, $stack);
         // 跟new 类($instances); 一样了
         return $reflector->newInstanceArgs($instance);
     }
 
     /**
-     * 返回当前App实例，单例.
+     * 解析构造函数参数
+     * @param $parameters
+     * @param $stack
+     * @return array
+     * @throws DependencyLoopException
+     * @throws ReflectionException
      */
-    public static function getContainer(): self
-    {
-        return self::$instance ?? self::$instance = new self();
-    }
-
-    //解析构造函数参数
-    protected function getDependencies($parameters): array
+    protected function getDependencies($parameters, $stack): array
     {
         $dependencies = []; // 当前类的所有依赖
         /** @var ReflectionParameter $parameter */
         foreach ($parameters ?? [] as $parameter) {
-            if ($parameter->getClass()) {
-                $dependencies[] = $this->get($parameter->getClass()->name);
+            if ($parameterClass = $parameter->getClass()) {
+                //判断构造参数栈中是否存在重复的类
+                if (isset($stack[$parameterClass->name])) {
+                    throw new DependencyLoopException('类 ' . key($stack) . ' 存在依赖循环，重复依赖的类是 ' . $parameterClass->name .' 请检查代码');
+                }
+                if (! $this->has($parameterClass->name)) {
+                    $stack[$parameterClass->getName()] = 1;
+                    $this->bindWithStack($parameterClass->name, $parameterClass->name, false, $stack);
+                }
+                $dependency = $this->get($parameterClass->name);
+            }  elseif ($parameter->isDefaultValueAvailable()) {
+                $dependency = $parameter->getDefaultValue();
+            } elseif ($parameter->getType()) {
+                $dependency = [
+                        'string' => '',
+                        'int' => 0,
+                        'array' => [],
+                        'bool' => false,
+                        'float' => 0.0,
+                        'iterable' => [],
+                        'callable' => function() {}
+                    ][$parameter->getType()->getName()] ?? null;
+            } else {
+                $dependency = null;
             }
+            $dependencies[] = $dependency;
         }
         return $dependencies;
-    }
-
-    /**
-     * 注册服务
-     */
-    protected function register(): void
-    {
-        $registers = [
-            'response' => Response::class,
-            'config' => Config::class,
-            'log' => Logger::class,
-            'router' => Router::class,
-            'pipeline' => PipeLine::class,
-            'exception' => HandleException::class,
-            ViewInterface::class => HerosphpView::class,
-        ];
-        foreach ($registers ?? [] as $name => $concrete) {
-            $this->bind($name, $concrete, true);
-        }
-    }
-
-    /**
-     * boot.
-     */
-    protected function boot(): void
-    {
-        self::getContainer()->get('config')->init();
-        self::getContainer()->get('exception')->init();
-        self::getContainer()->get(ViewInterface::class)->init();
     }
 }
