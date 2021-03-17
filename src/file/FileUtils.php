@@ -62,7 +62,7 @@ class FileUtils
      */
     public static function dirTraversal($dir): array
     {
-        $files = array();
+        $files = [];
         self::getDirFiles($dir, '', $files);
         return $files;
     }
@@ -76,18 +76,17 @@ class FileUtils
     private static function getDirFiles($absolute_dir, $relative_dir, &$files): void
     {
         $handler = opendir($absolute_dir);
-        if ( $handler !== false ) {
-            while ( $filename = readdir($handler) ) {
-                if ( $filename !== "." && $filename !== ".." ) {
-                    if ( is_dir($absolute_dir."/".$filename) ) {
-                        self::getDirFiles($absolute_dir."/".$filename, $relative_dir.$filename."/", $files);
+        if ($handler !== false) {
+            while ($filename = readdir($handler)) {
+                if ($filename !== '.' && $filename !== '..') {
+                    if (is_dir($absolute_dir . '/' . $filename)) {
+                        self::getDirFiles($absolute_dir . '/' . $filename, $relative_dir . $filename . '/', $files);
                     } else {
-                        $files[] = $relative_dir.$filename;
+                        $files[] = $relative_dir . $filename;
                     }
                 }
             }
             closedir($handler);
         }
     }
-
 }

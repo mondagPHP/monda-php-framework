@@ -46,7 +46,7 @@ class Hook
             $method = (new self::$hook[$name]());
             $method->$name(...$args);
         } else {
-            throw new HeroException("该hook还没注册");
+            throw new HeroException('该hook还没注册');
         }
     }
 }

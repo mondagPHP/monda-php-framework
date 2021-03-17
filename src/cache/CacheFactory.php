@@ -25,7 +25,7 @@ class CacheFactory
     {
         $config = config('cache');
         $type = $type === null ? $config['default'] : strtolower($type);
-        if (!isset(self::$instances[$type])) {
+        if (! isset(self::$instances[$type])) {
             switch ($type) {
                 case 'file':
                     self::$instances[$type] = new FileCache($config['file']['cache_dir']);
@@ -39,7 +39,6 @@ class CacheFactory
         }
         return self::$instances[$type];
     }
-
 
     /**
      * @param $classPath

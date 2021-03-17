@@ -20,12 +20,11 @@ class Loader
      */
     public static function service($serviceClass, $isSingleton = true)
     {
-        if (!Container::getContainer()->has($serviceClass)) {
+        if (! Container::getContainer()->has($serviceClass)) {
             Container::getContainer()->bind($serviceClass, $serviceClass, $isSingleton);
         }
         return Container::getContainer()->get($serviceClass);
     }
-
 
     /**
      * @param $serviceClass

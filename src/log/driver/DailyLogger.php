@@ -32,7 +32,7 @@ class DailyLogger extends AbstractLogger
         $replace = [];
         foreach ($context ?? [] as $key => $val) {
             // 检查该值是否可以转换为字符串
-            if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
+            if (! is_array($val) && (! is_object($val) || method_exists($val, '__toString'))) {
                 $replace['{' . $key . '}'] = $val;
             }
         }
@@ -49,7 +49,7 @@ class DailyLogger extends AbstractLogger
         $destination = $this->config['path'] . date('Y_m_d') . '.log';
         $message = $this->placeContext($message, $context);
         $message = sprintf($this->config['format'], date('H:i:s'), $level, $message) . PHP_EOL;
-        if (!is_dir($this->config['path'])) {
+        if (! is_dir($this->config['path'])) {
             FileUtils::makeFileDirs($this->config['path']);
         }
         error_log($message, 3, $destination);

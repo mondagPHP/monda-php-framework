@@ -8,5 +8,4 @@ namespace framework\exception;
  */
 class RequestMethodException extends \RuntimeException
 {
-
 }

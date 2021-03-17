@@ -12,7 +12,6 @@ use framework\string\StringUtils;
  */
 class HttpClient
 {
-
     /**
      * 发送 http GET 请求
      * @param $url
@@ -106,8 +105,8 @@ class HttpClient
         if (is_array($params)) {
             $params = StringUtils::jsonEncode($params);
         }
-        $curl = self::_curlInit($url, array('Content-Type' => 'application/json'));
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        $curl = self::_curlInit($url, ['Content-Type' => 'application/json']);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
         curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
         return self::_doRequest($curl, false);
     }
@@ -124,7 +123,7 @@ class HttpClient
         if (is_array($params)) {
             $params = StringUtils::jsonEncode($params);
         }
-        $curl = self::_curlInit($url, array('Content-Type' => 'application/json'));
+        $curl = self::_curlInit($url, ['Content-Type' => 'application/json']);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
         curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
         return self::_doRequest($curl, false);
@@ -142,13 +141,13 @@ class HttpClient
         $ret = curl_exec($curl);
         if ($ret === false) {
             curl_close($curl);
-            throw new HeroException("接口网络异常，请稍候再试");
+            throw new HeroException('接口网络异常，请稍候再试');
         }
         $info = curl_getinfo($curl);
 
         curl_close($curl);
         if ($ret === false) {
-            throw new HeroException("cURLException:" . curl_error($curl));
+            throw new HeroException('cURLException:' . curl_error($curl));
         }
         if ($return_header) {
             return ['header' => $info, 'body' => $ret];
@@ -173,7 +172,7 @@ class HttpClient
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         if (is_array($headers)) {
-            $_headers = array();
+            $_headers = [];
             foreach ($headers as $key => $value) {
                 $_headers[] = "{$key}:$value";
             }

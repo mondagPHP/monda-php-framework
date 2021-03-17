@@ -23,7 +23,7 @@ class Connection
     public static function fireConnection(): void
     {
         //上一次的连接跟本次的一样，无需在加载连接
-        if (!self::$isFired) {
+        if (! self::$isFired) {
             //加载配置
             $configs = config('database', []);
             $capsule = new Manager();
@@ -37,7 +37,7 @@ class Connection
                 $capsule->setEventDispatcher(new Dispatcher(new Container));
                 /** @var Dispatcher $dispatcher */
                 $dispatcher = $capsule->getEventDispatcher();
-                if (!$dispatcher->hasListeners(QueryExecuted::class)) {
+                if (! $dispatcher->hasListeners(QueryExecuted::class)) {
                     $dispatcher->listen(QueryExecuted::class, function ($query) {
                         $sql = vsprintf(str_replace('?', "'%s'", $query->sql), $query->bindings) . " \t[" . $query->time . ' ms] ';
                         Log::debug($sql);

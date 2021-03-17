@@ -15,7 +15,6 @@ class RouterAnnotationTest extends TestCase
 
     public function setUp(): void
     {
-
         defined('ANNOTATION') ?: define('ANNOTATION', true);
         $this->router = new MockRouter();
         $_GET = [];
@@ -136,5 +135,4 @@ class RouterAnnotationTest extends TestCase
         $this->expectExceptionMessage('framework\tests\route\mock\UserNotValidator 不是验证类，请检查代码');
         $this->router->dispatch($request);
     }
-
 }

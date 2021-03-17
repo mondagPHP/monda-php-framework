@@ -52,11 +52,10 @@ if (! function_exists('view')) {
     }
 }
 
-
 /**
  * 分配变量
  */
-if (!function_exists('assignViewVar')) {
+if (! function_exists('assignViewVar')) {
     function assignViewVar(string $key, $value)
     {
         Container::getContainer()->get(ViewInterface::class)->setTemplateVar($key, $value);

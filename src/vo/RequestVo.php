@@ -1,8 +1,6 @@
 <?php
 
-
 namespace framework\vo;
-
 
 class RequestVo implements RequestVoInterface
 {

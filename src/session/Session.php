@@ -28,8 +28,7 @@ class Session
                     session_start();
                     break;
                 case 'redis':
-                    session_set_save_handler(new RedisSession(config('session.redis')), true);
-                    session_start();
+                    RedisSession::start(config('session.redis'));
                     break;
                 default:
                     throw new HeroException('找不到驱动!');
