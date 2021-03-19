@@ -1,6 +1,5 @@
 <?php
 
-
 namespace framework\tests\Container;
 
 use framework\Bootstrap;
