@@ -46,11 +46,9 @@ class CronFileSynLock implements ISynLock
     {
         if (file_exists($this->lockFile)) {
             [$pid] = explode('|', file_get_contents($this->lockFile));
-            if (function_exists('posix_getsid')) {
-                if (posix_getsid($pid) !== false) {
-                    return false;
-                }
-            } elseif (! file_exists('/proc/' . $pid)) {
+            if (function_exists('posix_getsid') && posix_getsid($pid) !== false) {
+                return false;
+            } elseif (file_exists('/proc/' . $pid)) {
                 return false;
             }
         }
