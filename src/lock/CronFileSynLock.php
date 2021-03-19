@@ -46,7 +46,9 @@ class CronFileSynLock implements ISynLock
     {
         if (file_exists($this->lockFile)) {
             [$pid] = explode('|', file_get_contents($this->lockFile));
-            if (posix_getsid($pid) !== false) {
+            if (function_exists('posix_getsid') && posix_getsid($pid) !== false) {
+                return false;
+            } elseif (file_exists('/proc/' . $pid)) {
                 return false;
             }
         }
@@ -54,7 +56,7 @@ class CronFileSynLock implements ISynLock
         if (flock($this->fileHandler, LOCK_EX) === false) {
             return false;
         }
-        file_put_contents($this->lockFile, posix_getpid() . '|' . time() . '|' . $timeout);
+        file_put_contents($this->lockFile, getmypid() . '|' . time() . '|' . $timeout);
         return true;
     }
 
@@ -79,7 +81,7 @@ class CronFileSynLock implements ISynLock
         }
         if ($this->lockFile && file_exists($this->lockFile)) {
             [$pid] = explode('|', file_get_contents($this->lockFile));
-            if (posix_getpid() !== (int)$pid) {
+            if (getmypid() !== (int)$pid) {
                 return;
             }
             @unlink($this->lockFile);
