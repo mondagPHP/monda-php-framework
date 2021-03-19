@@ -1,17 +1,15 @@
 <?php
 
-
 namespace framework\tests\Container;
-
 
 use framework\config\Config;
 use framework\Container;
 use framework\exception\DependencyLoopException;
 use framework\request\FpmRequest;
 use framework\request\RequestInterface;
+use framework\tests\Container\mock\DependencyLoopA;
 use framework\tests\Container\mock\MultipleInjectionA;
 use framework\tests\Container\mock\MultipleInjectionB;
-use framework\tests\Container\mock\DependencyLoopA;
 use PHPUnit\Framework\TestCase;
 
 class ContainerTest extends TestCase
