@@ -115,7 +115,7 @@ class Router
     {
         $defaultUrlArr = Container::getContainer()->get('config')->get('app.default_url');
         //优先处理短链接映射
-        $requestUri = $request->getUri();
+        $requestUri = $this->handleRouteMap($request->getUri());
         $urlInfo = parse_url($requestUri);
         if ($urlInfo['path'] && $urlInfo['path'] !== '/') {
             $pathInfo = explode('/', $urlInfo['path']);
@@ -160,5 +160,21 @@ class Router
         if (! $this->method) {
             $this->method = $defaultUrlArr['method'];
         }
+    }
+
+    /**
+     * 处理路由映射
+     * @param string $url
+     * @return string
+     * date 2021/3/23
+     */
+    private function handleRouteMap(string $url): string
+    {
+        $configs = Container::getContainer()->get('config')->get('app.route_map');
+        $mapRules = [];
+        foreach ($configs as $key => $value) {
+            $mapRules['/' . $key . '/i'] = $value;
+        }
+        return preg_replace(array_keys($mapRules), array_values($mapRules), $url);
     }
 }
