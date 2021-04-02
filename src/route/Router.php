@@ -53,7 +53,6 @@ class Router
         //设置request controller requestMethod 参数
         $request->setControllerClass($controller);
         $request->setRequestMethod($this->method);
-
         $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
         $globalMiddleware = [];
         if (isset($middlewareConfig['global'])) {
@@ -72,10 +71,8 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
-
             //注解处理
             ActionCheck::create()->check($request, $reflectionMethod);
-
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
@@ -170,8 +167,8 @@ class Router
      */
     private function handleRouteMap(string $url): string
     {
-        $configs = Container::getContainer()->get('config')->get('app.route_map');
         $mapRules = [];
+        $configs = Container::getContainer()->get('config')->get('app.route_map');
         foreach ($configs ?? [] as $key => $value) {
             $mapRules['/' . $key . '/i'] = $value;
         }
