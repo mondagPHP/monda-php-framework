@@ -43,11 +43,6 @@ class Router
      */
     public function dispatch(RequestInterface $request)
     {
-        $pos = strpos($request->getUri(), ".");
-        if ($pos !== false) {
-            http_response_code(404);
-            return '';
-        }
         $this->parseURL($request);
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
 
