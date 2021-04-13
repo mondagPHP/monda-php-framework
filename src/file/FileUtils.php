@@ -22,7 +22,7 @@ class FileUtils
         $dir = '';
         foreach ($files as $value) {
             $dir .= $value . DIRECTORY_SEPARATOR;
-            if (! file_exists($dir) && ! mkdir($dir, 0666) && ! is_dir($dir)) {
+            if (! file_exists($dir) && ! mkdir($dir, 0777) && ! is_dir($dir)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
             }
         }
