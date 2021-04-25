@@ -43,6 +43,12 @@ class Router
      */
     public function dispatch(RequestInterface $request)
     {
+        //静态资源屏蔽
+        $fulUrl = $request->getFullUrl();
+        $urlPath = parse_url($fulUrl,PHP_URL_PATH);
+        if (strpos($urlPath,'.') !== false){
+            header("status: 404 Not Found");exit('404');
+        }
         $this->parseURL($request);
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
 
@@ -53,9 +59,9 @@ class Router
         //设置request controller requestMethod 参数
         $request->setControllerClass($controller);
         $request->setRequestMethod($this->method);
-        $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
         $globalMiddleware = [];
-        if (isset($middlewareConfig['global'])) {
+        $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
+        if (isset($middlewareConfig['global']) && !empty($middlewareConfig['global'])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig['global']);
         }
         if (isset($middlewareConfig[strtolower($this->module)])) {
