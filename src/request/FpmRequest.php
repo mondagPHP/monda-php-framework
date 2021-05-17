@@ -48,7 +48,7 @@ class FpmRequest implements RequestInterface
         $this->headers = $headers;
         $this->referer = $headers['HTTP_REFERER'] ?? '/';
         $requestParams = array_merge($_GET, $_POST);
-        if (isset($headers['HTTP_CONTENT_TYPE']) && $headers['HTTP_CONTENT_TYPE'] === 'application/json') {
+        if (isset($headers['HTTP_CONTENT_TYPE']) && strpos($headers['HTTP_CONTENT_TYPE'], 'application/json') === 0) {
             $json = json_decode(file_get_contents('php://input'), 1);
             if (! is_null($json)) {
                 $requestParams += $json;
