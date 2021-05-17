@@ -43,20 +43,25 @@ class Router
      */
     public function dispatch(RequestInterface $request)
     {
+        //静态资源屏蔽
+        $fulUrl = $request->getFullUrl();
+        $urlPath = parse_url($fulUrl,PHP_URL_PATH);
+        if (strpos($urlPath,'.') !== false){
+            header("status: 404 Not Found");exit('404');
+        }
         $this->parseURL($request);
         $controller = "app\\modules\\{$this->module}\\action\\" . str_replace('/', '\\', $this->action) . 'Action';
 
         $classExist = class_exists($controller);
-        if (! $classExist) {
+        if (!$classExist) {
             throw new RouteNotFoundException('找不到路由!');
         }
         //设置request controller requestMethod 参数
         $request->setControllerClass($controller);
         $request->setRequestMethod($this->method);
-
-        $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
         $globalMiddleware = [];
-        if (isset($middlewareConfig['global'])) {
+        $middlewareConfig = Container::getContainer()->get('config')->get('middleware', []);
+        if (isset($middlewareConfig['global']) && !empty($middlewareConfig['global'])) {
             $globalMiddleware = array_merge($globalMiddleware, $middlewareConfig['global']);
         }
         if (isset($middlewareConfig[strtolower($this->module)])) {
@@ -72,10 +77,8 @@ class Router
             $reflectionClass = new \ReflectionClass($controllerInstance);
             $reflectionMethod = $reflectionClass->getMethod($method);
             $reflectionParams = $reflectionMethod->getParameters();
-
             //注解处理
             ActionCheck::create()->check($request, $reflectionMethod);
-
             foreach ($reflectionParams ?? [] as $reflectionParam) {
                 $paramName = $reflectionParam->getName();
                 if (isset($requestParams[$paramName])) {
@@ -115,7 +118,7 @@ class Router
     {
         $defaultUrlArr = Container::getContainer()->get('config')->get('app.default_url');
         //优先处理短链接映射
-        $requestUri = $request->getUri();
+        $requestUri = $this->handleRouteMap($request->getUri());
         $urlInfo = parse_url($requestUri);
         if ($urlInfo['path'] && $urlInfo['path'] !== '/') {
             $pathInfo = explode('/', $urlInfo['path']);
@@ -151,14 +154,30 @@ class Router
             }
         }
         //如果没有任何参数，则访问默认页面。如http://www.framework.my这种格式
-        if (! $this->module) {
+        if (!$this->module) {
             $this->module = $defaultUrlArr['module'];
         }
-        if (! $this->action) {
+        if (!$this->action) {
             $this->action = ucfirst($defaultUrlArr['action']);
         }
-        if (! $this->method) {
+        if (!$this->method) {
             $this->method = $defaultUrlArr['method'];
         }
+    }
+
+    /**
+     * 处理路由映射
+     * @param string $url
+     * @return string
+     * date 2021/3/23
+     */
+    private function handleRouteMap(string $url): string
+    {
+        $mapRules = [];
+        $configs = Container::getContainer()->get('config')->get('app.route_map');
+        foreach ($configs ?? [] as $key => $value) {
+            $mapRules['/' . $key . '/i'] = $value;
+        }
+        return preg_replace(array_keys($mapRules), array_values($mapRules), $url);
     }
 }

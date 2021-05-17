@@ -162,7 +162,7 @@ class FpmRequest implements RequestInterface
                 $requestUri = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
             }
         }
-        $scheme = empty($_SERVER['HTTPS']) ? '' : ($_SERVER['HTTPS'] == 'on') ? 's' : '';
+        $scheme = empty($_SERVER['HTTPS']) ? '' : (($_SERVER['HTTPS'] == 'on') ? 's' : '');
         $protocol = strstr(strtolower($_SERVER['SERVER_PROTOCOL']), '/', true) . $scheme;       //端口还是蛮重要的，毕竟需要兼容特殊的场景
         $port = ($_SERVER['SERVER_PORT'] === '80') ? '' : (':' . $_SERVER['SERVER_PORT']);
         # 获取的完整url
