@@ -176,7 +176,7 @@ class Router
         $mapRules = [];
         $configs = Container::getContainer()->get('config')->get('app.route_map');
         foreach ($configs ?? [] as $key => $value) {
-            $mapRules['/' . $key . '/i'] = $value;
+            $mapRules['/' . $key . '/iU'] = $value;
         }
         return preg_replace(array_keys($mapRules), array_values($mapRules), $url);
     }
